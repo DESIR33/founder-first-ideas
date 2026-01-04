@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { DecisionModeProvider } from "@/hooks/useDecisionMode";
+import { AIStateProvider } from "@/hooks/useAIState";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SavedIdeas from "./pages/SavedIdeas";
@@ -19,22 +20,24 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <DecisionModeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/saved" element={<SavedIdeas />} />
-              <Route path="/idea/:id" element={<IdeaDetail />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/compare" element={<CompareIdeas />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AIStateProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/saved" element={<SavedIdeas />} />
+                <Route path="/idea/:id" element={<IdeaDetail />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/compare" element={<CompareIdeas />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AIStateProvider>
       </DecisionModeProvider>
     </AuthProvider>
   </QueryClientProvider>
