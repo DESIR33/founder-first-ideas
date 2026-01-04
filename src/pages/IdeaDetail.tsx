@@ -36,9 +36,10 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BusinessIdea } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
-import { getSavedIdeas, saveIdea, removeSavedIdea } from '@/lib/profileService';
+import { getSavedIdeas, saveIdea, removeSavedIdea, getIdeaNotes, IdeaNote } from '@/lib/profileService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { IdeaNotes } from '@/components/ideas/IdeaNotes';
 
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +47,7 @@ export default function IdeaDetail() {
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [notes, setNotes] = useState<IdeaNote[]>([]);
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -70,6 +72,10 @@ export default function IdeaDetail() {
         if (foundIdea) {
           setIdea(foundIdea);
           setIsSaved(true);
+          
+          // Load notes for this idea
+          const ideaNotes = await getIdeaNotes(user.id, id);
+          setNotes(ideaNotes);
         } else {
           toast({
             title: "Idea not found",
@@ -402,6 +408,15 @@ export default function IdeaDetail() {
                 </CardContent>
               </Card>
             </Section>
+            {/* Notes Section */}
+            {user && idea && (
+              <IdeaNotes
+                ideaId={idea.id}
+                userId={user.id}
+                notes={notes}
+                onNotesChange={setNotes}
+              />
+            )}
           </div>
 
           {/* Bottom Actions */}
