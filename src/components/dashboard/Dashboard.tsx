@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
   Bookmark, 
   X, 
@@ -43,6 +44,7 @@ export function Dashboard() {
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadData() {
@@ -156,7 +158,7 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <span className="text-xl font-semibold">FounderFit</span>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/saved')}>
                 <Bookmark className="w-4 h-4 mr-2" />
                 Saved ({savedIdeas.length})
               </Button>
