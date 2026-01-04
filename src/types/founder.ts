@@ -112,7 +112,7 @@ export interface BusinessIdea {
 }
 
 // Questionnaire Step Types
-export type QuestionType = 'choice' | 'slider' | 'multi-select' | 'binary' | 'trade-off' | 'text' | 'hours-slider';
+export type QuestionType = 'choice' | 'slider' | 'multi-select' | 'binary' | 'trade-off' | 'text' | 'hours-slider' | 'text-with-chips';
 
 export interface SliderLabel {
   position: number; // 0-100 percentage
