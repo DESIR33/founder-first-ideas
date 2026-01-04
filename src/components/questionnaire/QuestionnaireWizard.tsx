@@ -2,15 +2,47 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { QuestionStep, FounderProfile } from '@/types/founder';
 import { cn } from '@/lib/utils';
 
+// Tool options for multi-select
+const toolOptions = [
+  { value: 'notion', label: 'Notion' },
+  { value: 'airtable', label: 'Airtable' },
+  { value: 'zapier', label: 'Zapier' },
+  { value: 'make', label: 'Make' },
+  { value: 'chatgpt', label: 'ChatGPT' },
+  { value: 'claude', label: 'Claude' },
+  { value: 'figma', label: 'Figma' },
+  { value: 'canva', label: 'Canva' },
+  { value: 'slack', label: 'Slack' },
+  { value: 'hubspot', label: 'HubSpot' },
+  { value: 'mailchimp', label: 'Mailchimp' },
+  { value: 'stripe', label: 'Stripe' },
+  { value: 'shopify', label: 'Shopify' },
+  { value: 'wordpress', label: 'WordPress' },
+  { value: 'webflow', label: 'Webflow' },
+  { value: 'google-sheets', label: 'Google Sheets' },
+  { value: 'excel', label: 'Excel' },
+  { value: 'trello', label: 'Trello' },
+];
+
+// Suggestion chips for text inputs
+const paidSkillsSuggestions = [
+  'Writing', 'Design', 'Marketing', 'Sales', 'Project Management',
+  'Data Analysis', 'Consulting', 'Teaching', 'Customer Support', 'Accounting'
+];
+
+const expertiseSuggestions = [
+  'Explaining complex topics', 'Organizing events', 'Fixing tech issues',
+  'Giving advice', 'Problem solving', 'Negotiating', 'Public speaking', 'Networking'
+];
+
 const questionSteps: QuestionStep[] = [
-  // Background
+  // Essential questions only - 10 total
   {
     id: 'employment',
     category: 'background',
@@ -25,24 +57,6 @@ const questionSteps: QuestionStep[] = [
       { value: 'retired', label: 'Retired', icon: '🌴' },
     ],
     required: true,
-  },
-  {
-    id: 'day-job',
-    category: 'background',
-    type: 'text',
-    question: "What's your day job?",
-    subtext: "What do you do for work? This helps us find ideas that leverage your existing expertise.",
-    textConfig: { placeholder: "e.g., Marketing manager at a SaaS company" },
-    required: false,
-  },
-  {
-    id: 'location',
-    category: 'background',
-    type: 'text',
-    question: "Where are you located?",
-    subtext: "Some ideas work better in certain markets or time zones.",
-    textConfig: { placeholder: "e.g., Austin, TX or Remote" },
-    required: false,
   },
   {
     id: 'hours',
@@ -68,27 +82,6 @@ const questionSteps: QuestionStep[] = [
     required: true,
   },
   {
-    id: 'risk',
-    category: 'background',
-    type: 'slider',
-    question: "How much risk are you comfortable with?",
-    subtext: "There's no wrong answer. Some great businesses are low-risk.",
-    sliderConfig: { 
-      min: 1, 
-      max: 10, 
-      step: 1, 
-      minLabel: 'Play it safe', 
-      maxLabel: 'Swing big',
-      showValue: false,
-      labels: [
-        { position: 0, label: 'Safe bets only' },
-        { position: 50, label: 'Balanced approach' },
-        { position: 100, label: 'High risk, high reward' },
-      ]
-    },
-    required: true,
-  },
-  {
     id: 'capital',
     category: 'background',
     type: 'choice',
@@ -102,8 +95,6 @@ const questionSteps: QuestionStep[] = [
     ],
     required: true,
   },
-  
-  // Skills
   {
     id: 'technical',
     category: 'skills',
@@ -122,165 +113,30 @@ const questionSteps: QuestionStep[] = [
   {
     id: 'tools-confident',
     category: 'skills',
-    type: 'text',
+    type: 'multi-select',
     question: "What tools do you already use confidently?",
-    subtext: "No-code tools, CRM, email, automation, AI tools, etc.",
-    textConfig: { placeholder: "e.g., Notion, Airtable, Zapier, ChatGPT, Figma...", multiline: true },
+    subtext: "Select all that apply.",
+    options: toolOptions.map(t => ({ value: t.value, label: t.label })),
     required: false,
   },
   {
     id: 'paid-skills',
     category: 'skills',
-    type: 'text',
+    type: 'text-with-chips',
     question: "What have you gotten paid to do?",
     subtext: "These are your proven skills that others value.",
-    textConfig: { placeholder: "e.g., Writing, project management, design, sales calls...", multiline: true },
+    textConfig: { placeholder: "e.g., Writing, project management, design...", multiline: true },
     required: false,
   },
   {
     id: 'expertise',
     category: 'skills',
-    type: 'text',
+    type: 'text-with-chips',
     question: "What do people ask you for help with?",
     subtext: "What comes naturally to you that others find difficult?",
-    textConfig: { placeholder: "e.g., Explaining complex topics, organizing events, fixing tech issues...", multiline: true },
+    textConfig: { placeholder: "e.g., Explaining complex topics, organizing events...", multiline: true },
     required: false,
   },
-  {
-    id: 'marketing',
-    category: 'skills',
-    type: 'slider',
-    question: "How comfortable are you with marketing?",
-    subtext: "Can you get the word out about your product?",
-    sliderConfig: { 
-      min: 1, 
-      max: 10, 
-      step: 1, 
-      minLabel: 'Hate it', 
-      maxLabel: 'Love it',
-      showValue: false,
-      labels: [
-        { position: 0, label: 'Avoid at all costs' },
-        { position: 50, label: 'Can do it if needed' },
-        { position: 100, label: 'Natural at it' },
-      ]
-    },
-    required: true,
-  },
-  {
-    id: 'content-skills',
-    category: 'skills',
-    type: 'multi-select',
-    question: "What content can you create?",
-    subtext: "Select all that apply. These are distribution assets.",
-    options: [
-      { value: 'writing', label: 'Writing', description: 'Articles, newsletters, tweets' },
-      { value: 'video', label: 'Video', description: 'YouTube, TikTok, Loom' },
-      { value: 'sales', label: 'Sales', description: 'Calls, demos, closing' },
-      { value: 'none', label: "None of these", description: "I'll figure it out" },
-    ],
-    required: true,
-  },
-  {
-    id: 'audience',
-    category: 'skills',
-    type: 'choice',
-    question: "Do you have an existing audience?",
-    subtext: "Social followers, email list, community—anything counts.",
-    options: [
-      { value: 'none', label: 'No audience yet', description: 'Starting from zero' },
-      { value: 'small', label: 'Small (100-1K)', description: 'Some followers/subscribers' },
-      { value: 'medium', label: 'Medium (1K-10K)', description: 'Real engagement' },
-      { value: 'large', label: 'Large (10K+)', description: 'Established presence' },
-    ],
-    required: true,
-  },
-  
-  // Interests & Market
-  {
-    id: 'interests',
-    category: 'market',
-    type: 'text',
-    question: "What do you enjoy outside of work?",
-    subtext: "If money were no object, how would you spend your time?",
-    textConfig: { placeholder: "e.g., Photography, fitness, gaming, cooking, travel...", multiline: true },
-    required: false,
-  },
-  {
-    id: 'accessible-industries',
-    category: 'market',
-    type: 'text',
-    question: "What industries do you already have access to?",
-    subtext: "Through work, friends, family, past jobs, or hobbies.",
-    textConfig: { placeholder: "e.g., Healthcare through my spouse, real estate from a past job...", multiline: true },
-    required: false,
-  },
-  {
-    id: 'business-connections',
-    category: 'market',
-    type: 'text',
-    question: "Who do you talk to weekly that runs a business?",
-    subtext: "Personal connections to potential customers are gold.",
-    textConfig: { placeholder: "e.g., My neighbor runs a gym, my friend owns a restaurant...", multiline: true },
-    required: false,
-  },
-  {
-    id: 'automation-insight',
-    category: 'market',
-    type: 'text',
-    question: 'Have you ever thought "This should be automated"?',
-    subtext: "At work or in life—those moments often hide business ideas.",
-    textConfig: { placeholder: "e.g., Scheduling patient follow-ups, tracking inventory, expense reports...", multiline: true },
-    required: false,
-  },
-  
-  // Constraints
-  {
-    id: 'obligations',
-    category: 'constraints',
-    type: 'binary',
-    question: "Do you have family obligations that limit your time?",
-    subtext: "Kids, caregiving, etc. No judgment—just helps us match better.",
-    options: [
-      { value: 'yes', label: 'Yes' },
-      { value: 'no', label: 'No' },
-    ],
-    required: true,
-  },
-  {
-    id: 'predictability',
-    category: 'constraints',
-    type: 'trade-off',
-    question: "What matters more to you?",
-    tradeOffConfig: {
-      optionA: { value: 'predictable', label: 'Predictable income', description: 'Stable, slower growth' },
-      optionB: { value: 'upside', label: 'High upside', description: 'Variable, bigger wins' },
-    },
-    required: true,
-  },
-  {
-    id: 'stress',
-    category: 'constraints',
-    type: 'slider',
-    question: "What's your stress tolerance?",
-    subtext: "Some businesses are calmer than others.",
-    sliderConfig: { 
-      min: 1, 
-      max: 10, 
-      step: 1, 
-      minLabel: 'Keep it calm', 
-      maxLabel: 'Bring the chaos',
-      showValue: false,
-      labels: [
-        { position: 0, label: 'Low stress only' },
-        { position: 50, label: 'Moderate is fine' },
-        { position: 100, label: 'Thrive under pressure' },
-      ]
-    },
-    required: true,
-  },
-  
-  // Preferences
   {
     id: 'selling-preference',
     category: 'preferences',
@@ -296,45 +152,6 @@ const questionSteps: QuestionStep[] = [
     required: true,
   },
   {
-    id: 'business-model',
-    category: 'preferences',
-    type: 'multi-select',
-    question: "What type of business appeals to you?",
-    subtext: "Select all that interest you.",
-    options: [
-      { value: 'saas', label: 'SaaS / Software', description: 'Recurring revenue' },
-      { value: 'service', label: 'Service business', description: 'Trade time for money' },
-      { value: 'content', label: 'Content / Media', description: 'Audience-based' },
-      { value: 'product', label: 'Digital products', description: 'Create once, sell forever' },
-      { value: 'marketplace', label: 'Marketplace', description: 'Connect buyers & sellers' },
-    ],
-    required: true,
-  },
-  {
-    id: 'open-to-service',
-    category: 'preferences',
-    type: 'binary',
-    question: 'Are you open to starting as a "done-for-you" service?',
-    subtext: "Many successful products started as services first.",
-    options: [
-      { value: 'yes', label: 'Yes, good way to learn' },
-      { value: 'no', label: 'No, want to skip that' },
-    ],
-    required: true,
-  },
-  {
-    id: 'build-in-public',
-    category: 'preferences',
-    type: 'binary',
-    question: "Do you want to build in public or quietly?",
-    subtext: "Building in public can help with marketing but isn't for everyone.",
-    options: [
-      { value: 'yes', label: 'Build in public' },
-      { value: 'no', label: 'Build quietly' },
-    ],
-    required: true,
-  },
-  {
     id: 'time-horizon',
     category: 'preferences',
     type: 'choice',
@@ -343,41 +160,6 @@ const questionSteps: QuestionStep[] = [
       { value: 'quick-cash', label: 'Quick wins', description: 'Revenue in weeks, not months' },
       { value: 'long-term', label: 'Long-term asset', description: 'Build something lasting' },
       { value: 'flexible', label: 'Flexible', description: 'Show me both' },
-    ],
-    required: true,
-  },
-  
-  // Personality
-  {
-    id: 'builder-operator',
-    category: 'personality',
-    type: 'slider',
-    question: "Are you a builder or an operator?",
-    subtext: "Builders create from scratch. Operators optimize and scale.",
-    sliderConfig: { 
-      min: 1, 
-      max: 10, 
-      step: 1, 
-      minLabel: 'Builder', 
-      maxLabel: 'Operator',
-      showValue: false,
-      labels: [
-        { position: 0, label: 'Love creating new things' },
-        { position: 50, label: 'Both equally' },
-        { position: 100, label: 'Love optimizing systems' },
-      ]
-    },
-    required: true,
-  },
-  {
-    id: 'solo-team',
-    category: 'personality',
-    type: 'choice',
-    question: "How do you prefer to work?",
-    options: [
-      { value: 'solo', label: 'Solo', description: 'Full control, all responsibility' },
-      { value: 'team', label: 'With a team', description: 'Delegate, collaborate' },
-      { value: 'either', label: 'Either works', description: 'Depends on the opportunity' },
     ],
     required: true,
   },
@@ -400,7 +182,7 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
   };
   
   const canProceed = currentQuestion.required 
-    ? answers[currentQuestion.id] !== undefined && answers[currentQuestion.id] !== ''
+    ? answers[currentQuestion.id] !== undefined && answers[currentQuestion.id] !== '' && (Array.isArray(answers[currentQuestion.id]) ? answers[currentQuestion.id].length > 0 : true)
     : true;
   
   const handleNext = () => {
@@ -597,6 +379,15 @@ function QuestionRenderer({ question, value, onChange }: QuestionRendererProps) 
             config={question.textConfig!}
             value={value}
             onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'text-with-chips' && (
+          <TextInputWithChips
+            config={question.textConfig!}
+            value={value}
+            onChange={onChange}
+            suggestions={question.id === 'paid-skills' ? paidSkillsSuggestions : expertiseSuggestions}
           />
         )}
       </motion.div>
@@ -812,48 +603,23 @@ function MultiSelectOptions({
   };
   
   return (
-    <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto">
+    <div className="flex flex-wrap gap-2 max-w-xl mx-auto justify-center">
       {options?.map((option, index) => (
         <motion.button
           key={option.value}
           onClick={() => toggleOption(option.value)}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.05, duration: 0.3 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: index * 0.02, duration: 0.2 }}
           className={cn(
-            "p-4 rounded-2xl border text-left transition-all duration-300 group relative",
-            "hover:scale-[1.02] hover:shadow-soft",
+            "px-4 py-2.5 rounded-full border text-sm font-medium transition-all duration-200",
+            "hover:scale-105",
             value.includes(option.value)
-              ? "border-foreground/20 bg-foreground/5 shadow-soft"
-              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80"
+              ? "border-foreground/30 bg-foreground text-background"
+              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80 text-foreground"
           )}
         >
-          <div className="flex items-start gap-3">
-            <div className={cn(
-              "w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center mt-0.5 flex-shrink-0",
-              value.includes(option.value)
-                ? "border-foreground bg-foreground"
-                : "border-border/60 group-hover:border-muted-foreground/50"
-            )}>
-              {value.includes(option.value) && (
-                <motion.svg 
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="w-3 h-3 text-background" 
-                  viewBox="0 0 12 12" 
-                  fill="none"
-                >
-                  <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </motion.svg>
-              )}
-            </div>
-            <div>
-              <p className="font-medium text-foreground">{option.label}</p>
-              {option.description && (
-                <p className="text-sm text-muted-foreground mt-0.5">{option.description}</p>
-              )}
-            </div>
-          </div>
+          {option.label}
         </motion.button>
       ))}
     </div>
@@ -957,47 +723,99 @@ function TextInput({
   );
 }
 
+function TextInputWithChips({ 
+  config, 
+  value, 
+  onChange,
+  suggestions
+}: { 
+  config: NonNullable<QuestionStep['textConfig']>; 
+  value: string; 
+  onChange: (v: string) => void;
+  suggestions: string[];
+}) {
+  const handleChipClick = (chip: string) => {
+    const currentValue = value || '';
+    if (currentValue.toLowerCase().includes(chip.toLowerCase())) return;
+    
+    const separator = currentValue.trim() ? ', ' : '';
+    onChange(currentValue + separator + chip);
+  };
+  
+  return (
+    <div className="max-w-md mx-auto space-y-4">
+      <Textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={config.placeholder}
+        className="min-h-[100px] bg-card/60 backdrop-blur-sm border-border/30 text-base rounded-2xl p-4 shadow-soft focus:ring-accent/30 resize-none"
+      />
+      
+      <div className="flex flex-wrap gap-2 justify-center">
+        {suggestions.map((chip, index) => (
+          <motion.button
+            key={chip}
+            type="button"
+            onClick={() => handleChipClick(chip)}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.03, duration: 0.2 }}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200",
+              "border border-border/40 bg-secondary/40 text-muted-foreground",
+              "hover:bg-secondary/60 hover:text-foreground hover:border-border/60",
+              value?.toLowerCase().includes(chip.toLowerCase()) && "opacity-50 cursor-default"
+            )}
+          >
+            + {chip}
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function mapAnswersToProfile(answers: Record<string, any>): FounderProfile {
   return {
     employmentStatus: answers['employment'],
     hoursPerWeek: answers['hours'] || 10,
     monthlyIncomeGoal: parseInt(answers['income-goal']) || 3000,
-    riskTolerance: answers['risk'] || 5,
+    riskTolerance: 5,
     capitalAvailable: answers['capital'],
-    location: answers['location'],
-    dayJob: answers['day-job'],
+    location: undefined,
+    dayJob: undefined,
     technicalAbility: answers['technical'],
-    marketingComfort: answers['marketing'] || 5,
-    hasWritingSkills: (answers['content-skills'] || []).includes('writing'),
-    hasVideoSkills: (answers['content-skills'] || []).includes('video'),
-    hasSalesExperience: (answers['content-skills'] || []).includes('sales'),
+    marketingComfort: 5,
+    hasWritingSkills: false,
+    hasVideoSkills: false,
+    hasSalesExperience: false,
     existingAudience: {
-      hasAudience: answers['audience'] !== 'none',
-      size: answers['audience'] === 'small' ? 500 : answers['audience'] === 'medium' ? 5000 : answers['audience'] === 'large' ? 20000 : 0,
+      hasAudience: false,
+      size: 0,
     },
     industryExperience: [],
     paidSkills: answers['paid-skills'] ? [answers['paid-skills']] : [],
-    interests: answers['interests'] ? [answers['interests']] : [],
+    interests: [],
     expertise: answers['expertise'] ? [answers['expertise']] : [],
-    toolsConfident: answers['tools-confident'] ? [answers['tools-confident']] : [],
-    hasFamilyObligations: answers['obligations'] === 'yes',
+    toolsConfident: answers['tools-confident'] || [],
+    hasFamilyObligations: false,
     geographicLimits: false,
     hasLegalRestrictions: false,
-    stressTolerance: answers['stress'] || 5,
-    needsPredictability: answers['predictability'] === 'predictable',
+    stressTolerance: 5,
+    needsPredictability: false,
     preferredBusinessType: answers['selling-preference'] === 'mixed' ? 'both' : (answers['selling-preference'] || 'both'),
-    preferredModel: answers['business-model'] || [],
+    preferredModel: [],
     timeHorizon: answers['time-horizon'],
-    teamPreference: answers['solo-team'],
+    teamPreference: 'either',
     rolePreference: 'both',
     sellingPreference: answers['selling-preference'],
-    buildInPublic: answers['build-in-public'] === 'yes',
-    openToService: answers['open-to-service'] === 'yes',
-    accessibleIndustries: answers['accessible-industries'] ? [answers['accessible-industries']] : [],
-    businessConnections: answers['business-connections'],
-    automationInsight: answers['automation-insight'],
+    buildInPublic: false,
+    openToService: true,
+    accessibleIndustries: [],
+    businessConnections: undefined,
+    automationInsight: undefined,
     personalityType: {
-      builderVsOptimizer: answers['builder-operator'] || 5,
+      builderVsOptimizer: 5,
       visionaryVsExecutor: 5,
       structureVsAmbiguity: 5,
     },
