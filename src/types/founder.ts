@@ -7,8 +7,12 @@ export interface FounderProfile {
   riskTolerance: number; // 1-10
   capitalAvailable: '$0' | '<$1k' | '$1k-$5k' | '$5k+';
   
+  // Location & Job
+  location?: string;
+  dayJob?: string;
+  
   // Skills & Assets
-  technicalAbility: 'none' | 'no-code' | 'some-code' | 'developer';
+  technicalAbility: 'none' | 'no-code' | 'ai-tools' | 'some-code' | 'developer';
   marketingComfort: number; // 1-10
   hasWritingSkills: boolean;
   hasVideoSkills: boolean;
@@ -19,6 +23,12 @@ export interface FounderProfile {
     platform?: string;
   };
   industryExperience: string[];
+  
+  // New skills fields
+  paidSkills?: string[];
+  interests?: string[];
+  expertise?: string[];
+  toolsConfident?: string[];
   
   // Constraints
   hasFamilyObligations: boolean;
@@ -33,6 +43,16 @@ export interface FounderProfile {
   timeHorizon: 'quick-cash' | 'long-term' | 'flexible';
   teamPreference: 'solo' | 'team' | 'either';
   rolePreference: 'builder' | 'operator' | 'both';
+  
+  // New preferences
+  sellingPreference?: 'b2b' | 'b2c' | 'teaching' | 'mixed';
+  buildInPublic?: boolean;
+  openToService?: boolean;
+  
+  // Market proximity
+  accessibleIndustries?: string[];
+  businessConnections?: string;
+  automationInsight?: string;
   
   // Personality
   personalityType: {
@@ -92,7 +112,12 @@ export interface BusinessIdea {
 }
 
 // Questionnaire Step Types
-export type QuestionType = 'choice' | 'slider' | 'multi-select' | 'binary' | 'trade-off';
+export type QuestionType = 'choice' | 'slider' | 'multi-select' | 'binary' | 'trade-off' | 'text' | 'hours-slider';
+
+export interface SliderLabel {
+  position: number; // 0-100 percentage
+  label: string;
+}
 
 export interface QuestionOption {
   value: string;
@@ -103,7 +128,7 @@ export interface QuestionOption {
 
 export interface QuestionStep {
   id: string;
-  category: 'background' | 'skills' | 'constraints' | 'preferences' | 'personality';
+  category: 'background' | 'skills' | 'constraints' | 'preferences' | 'personality' | 'market';
   type: QuestionType;
   question: string;
   subtext?: string;
@@ -114,10 +139,16 @@ export interface QuestionStep {
     step: number;
     minLabel: string;
     maxLabel: string;
+    labels?: SliderLabel[]; // For descriptive sliders
+    showValue?: boolean; // Whether to show the numeric value
   };
   tradeOffConfig?: {
     optionA: QuestionOption;
     optionB: QuestionOption;
+  };
+  textConfig?: {
+    placeholder: string;
+    multiline?: boolean;
   };
   required: boolean;
 }
