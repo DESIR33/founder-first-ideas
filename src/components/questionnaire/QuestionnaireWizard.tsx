@@ -473,15 +473,27 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
             Back
           </Button>
           
-          <Button
-            variant="wizard"
-            onClick={handleNext}
-            disabled={!canProceed}
-            className="w-40"
-          >
-            {isLastStep ? 'See My Results' : 'Continue'}
-            <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
+          <div className="flex items-center gap-3">
+            {!currentQuestion.required && !answers[currentQuestion.id] && (
+              <Button
+                variant="ghost"
+                onClick={handleNext}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Skip
+              </Button>
+            )}
+            
+            <Button
+              variant="wizard"
+              onClick={handleNext}
+              disabled={!canProceed}
+              className="w-40"
+            >
+              {isLastStep ? 'See My Results' : 'Continue'}
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </footer>
     </div>
