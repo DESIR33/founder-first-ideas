@@ -22,7 +22,8 @@ import {
   Scale,
   CheckSquare,
   Square,
-  ClipboardCheck
+  ClipboardCheck,
+  Focus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -49,6 +50,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BusinessIdea } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMode } from '@/hooks/useDecisionMode';
 import { 
   getSavedIdeas, 
   removeSavedIdea, 
@@ -61,6 +63,8 @@ import { getValidationProgress } from '@/lib/validationService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { CollectionManager, AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
+import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
+import { DecisionModeTooltip } from '@/components/decision-mode/DecisionModeTooltip';
 
 export default function SavedIdeas() {
   const [ideas, setIdeas] = useState<BusinessIdea[]>([]);
@@ -78,6 +82,7 @@ export default function SavedIdeas() {
   const [validationProgress, setValidationProgress] = useState<Record<string, { completed: number; total: number }>>({});
   
   const { user, signOut } = useAuth();
+  const { isActive: isDecisionModeActive, activeIdeaId } = useDecisionMode();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -200,6 +205,9 @@ export default function SavedIdeas() {
 
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Decision Mode Banner */}
+      <DecisionModeBanner />
+      
       {/* Subtle gradient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
       
@@ -215,17 +223,30 @@ export default function SavedIdeas() {
               <span className="text-xl font-semibold">Saved Ideas</span>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant={compareMode ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => {
-                  setCompareMode(!compareMode);
-                  if (compareMode) setCompareIds([]);
-                }}
-              >
-                <Scale className="w-4 h-4 mr-2" />
-                {compareMode ? 'Cancel' : 'Compare'}
-              </Button>
+              {isDecisionModeActive ? (
+                <DecisionModeTooltip action="compare ideas">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled
+                  >
+                    <Scale className="w-4 h-4 mr-2" />
+                    Compare
+                  </Button>
+                </DecisionModeTooltip>
+              ) : (
+                <Button 
+                  variant={compareMode ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => {
+                    setCompareMode(!compareMode);
+                    if (compareMode) setCompareIds([]);
+                  }}
+                >
+                  <Scale className="w-4 h-4 mr-2" />
+                  {compareMode ? 'Cancel' : 'Compare'}
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
@@ -237,7 +258,7 @@ export default function SavedIdeas() {
       
       {/* Compare Mode Bar */}
       <AnimatePresence>
-        {compareMode && (
+        {compareMode && !isDecisionModeActive && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -370,7 +391,7 @@ export default function SavedIdeas() {
                       <SavedIdeaCard
                         idea={idea}
                         isExpanded={expandedId === idea.id}
-                        compareMode={compareMode}
+                        compareMode={compareMode && !isDecisionModeActive}
                         isSelectedForCompare={compareIds.includes(idea.id)}
                         onToggleCompare={() => toggleCompareId(idea.id)}
                         onToggleExpand={() => setExpandedId(expandedId === idea.id ? null : idea.id)}
@@ -384,6 +405,8 @@ export default function SavedIdeas() {
                           setIdeaCollections(prev => ({ ...prev, [idea.id]: newIds }));
                         }}
                         validationProgress={validationProgress[idea.id]}
+                        isActiveIdea={isDecisionModeActive && activeIdeaId === idea.id}
+                        isDecisionModeActive={isDecisionModeActive}
                       />
                     </motion.div>
                   ))}
@@ -412,6 +435,8 @@ interface SavedIdeaCardProps {
   userId: string;
   onCollectionsUpdate: (newIds: string[]) => void;
   validationProgress?: { completed: number; total: number };
+  isActiveIdea?: boolean;
+  isDecisionModeActive?: boolean;
 }
 
 function SavedIdeaCard({ 
@@ -428,7 +453,9 @@ function SavedIdeaCard({
   ideaCollectionIds,
   userId,
   onCollectionsUpdate,
-  validationProgress
+  validationProgress,
+  isActiveIdea,
+  isDecisionModeActive
 }: SavedIdeaCardProps) {
   const progressPercent = validationProgress && validationProgress.total > 0 
     ? Math.round((validationProgress.completed / validationProgress.total) * 100) 
@@ -436,7 +463,8 @@ function SavedIdeaCard({
   return (
     <Card className={cn(
       "overflow-hidden transition-all",
-      isSelectedForCompare && "ring-2 ring-foreground"
+      isSelectedForCompare && "ring-2 ring-foreground",
+      isActiveIdea && "ring-2 ring-primary bg-primary/5"
     )}>
       {/* Collapsed Header */}
       <div 
@@ -457,6 +485,12 @@ function SavedIdeaCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="text-xs">{idea.category}</Badge>
+              {isActiveIdea && (
+                <Badge variant="default" className="text-xs gap-1">
+                  <Focus className="w-3 h-3" />
+                  Committed
+                </Badge>
+              )}
               <div className="flex items-center gap-1 text-sm">
                 <Zap className="w-3 h-3" />
                 <span className="font-medium">{idea.matchScore}%</span>

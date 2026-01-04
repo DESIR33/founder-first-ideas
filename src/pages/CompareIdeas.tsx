@@ -15,7 +15,8 @@ import {
   Scale,
   Plus,
   BarChart3,
-  TrendingDown
+  TrendingDown,
+  Focus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,9 +24,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { BusinessIdea, FounderProfile } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMode } from '@/hooks/useDecisionMode';
 import { getSavedIdeas, fetchUserProfile, mapDbProfileToFounderProfile } from '@/lib/profileService';
 import { calculateMatchBreakdown, MatchFactor } from '@/lib/matchScoring';
 import { cn } from '@/lib/utils';
+import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
 
 export default function CompareIdeas() {
   const [allIdeas, setAllIdeas] = useState<BusinessIdea[]>([]);
@@ -33,6 +36,7 @@ export default function CompareIdeas() {
   const [loading, setLoading] = useState(true);
   const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const { user } = useAuth();
+  const { isActive: isDecisionModeActive, activeIdeaId } = useDecisionMode();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -91,6 +95,48 @@ export default function CompareIdeas() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-foreground" />
+      </div>
+    );
+  }
+
+  // Block comparison in Decision Mode
+  if (isDecisionModeActive) {
+    return (
+      <div className="min-h-screen bg-background relative">
+        <DecisionModeBanner />
+        
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+        
+        <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/saved')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Ideas
+              </Button>
+            </div>
+          </div>
+        </header>
+        
+        <main className="container mx-auto px-6 py-16 relative z-10 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Focus className="w-5 h-5 text-primary" />
+              <span className="font-medium">Decision Mode Active</span>
+            </div>
+            
+            <Scale className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Comparison Paused</h2>
+            <p className="text-muted-foreground mb-6">
+              You've committed to an idea. Exit Decision Mode to compare ideas again.
+            </p>
+            
+            <Button onClick={() => navigate(`/idea/${activeIdeaId}`)}>
+              <Focus className="w-4 h-4 mr-2" />
+              View Committed Idea
+            </Button>
+          </div>
+        </main>
       </div>
     );
   }
