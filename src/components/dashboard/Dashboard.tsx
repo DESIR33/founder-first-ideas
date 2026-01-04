@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { 
   Bookmark, 
   X, 
-  Calendar, 
   DollarSign, 
   Clock, 
   Zap,
@@ -127,18 +126,18 @@ export function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen gradient-hero flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-foreground" />
       </div>
     );
   }
   
   if (!profileSummary || !currentIdea) {
     return (
-      <div className="min-h-screen gradient-hero flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">No ideas available at the moment.</p>
-          <Button variant="accent" className="mt-4" onClick={() => window.location.reload()}>
+          <Button variant="default" className="mt-4" onClick={() => window.location.reload()}>
             Refresh
           </Button>
         </div>
@@ -147,12 +146,15 @@ export function Dashboard() {
   }
   
   return (
-    <div className="min-h-screen gradient-hero">
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle gradient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+      
       {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <span className="font-serif text-xl font-semibold">FounderFit</span>
+            <span className="text-xl font-semibold">FounderFit</span>
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm">
                 <Bookmark className="w-4 h-4 mr-2" />
@@ -167,7 +169,7 @@ export function Dashboard() {
         </div>
       </header>
       
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8 relative z-10">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content - Idea */}
           <div className="lg:col-span-2 space-y-6">
@@ -210,20 +212,20 @@ function IdeaCard({ idea, onSave, onDismiss }: IdeaCardProps) {
   return (
     <Card className="overflow-hidden">
       {/* Header */}
-      <CardHeader className="bg-primary text-primary-foreground p-6">
+      <CardHeader className="bg-secondary p-6 border-b border-border/50">
         <div className="flex items-start justify-between">
           <div>
             <Badge variant="accent" className="mb-3">
               This week's idea
             </Badge>
-            <CardTitle className="text-2xl sm:text-3xl mb-2 text-primary-foreground">
+            <CardTitle className="text-2xl sm:text-3xl mb-2">
               {idea.title}
             </CardTitle>
-            <p className="text-primary-foreground/80">{idea.tagline}</p>
+            <p className="text-muted-foreground">{idea.tagline}</p>
           </div>
-          <div className="flex items-center gap-2 bg-accent/20 px-3 py-1.5 rounded-full">
-            <Zap className="w-4 h-4 text-accent" />
-            <span className="font-semibold text-accent">{idea.matchScore}% match</span>
+          <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border/50">
+            <Zap className="w-4 h-4 text-foreground" />
+            <span className="font-semibold">{idea.matchScore}% match</span>
           </div>
         </div>
       </CardHeader>
@@ -262,7 +264,7 @@ function IdeaCard({ idea, onSave, onDismiss }: IdeaCardProps) {
         
         {/* Why You */}
         <Section 
-          icon={<Lightbulb className="w-5 h-5 text-accent" />}
+          icon={<Lightbulb className="w-5 h-5 text-foreground" />}
           title="Why this fits you"
         >
           <p className="text-muted-foreground">{idea.whyYou}</p>
@@ -298,7 +300,7 @@ function IdeaCard({ idea, onSave, onDismiss }: IdeaCardProps) {
           <div className="bg-secondary/50 rounded-xl p-4 space-y-3">
             {idea.sevenDayPlan.map((item, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-accent/20 text-accent text-xs font-semibold flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-muted text-foreground text-xs font-semibold flex items-center justify-center flex-shrink-0">
                   {i + 1}
                 </div>
                 <span className="text-sm">{item}</span>
@@ -323,8 +325,8 @@ function IdeaCard({ idea, onSave, onDismiss }: IdeaCardProps) {
         </Section>
         
         {/* Actions */}
-        <div className="flex items-center gap-4 pt-4 border-t">
-          <Button variant="accent" size="lg" className="flex-1" onClick={onSave}>
+        <div className="flex items-center gap-4 pt-4 border-t border-border/50">
+          <Button variant="default" size="lg" className="flex-1" onClick={onSave}>
             <Bookmark className="w-4 h-4 mr-2" />
             Save this idea
           </Button>
@@ -350,7 +352,7 @@ function Stat({
   valueClass?: string;
 }) {
   return (
-    <div className="bg-secondary/50 rounded-lg p-3">
+    <div className="bg-secondary/50 rounded-xl p-3 border border-border/30">
       <div className="flex items-center gap-2 text-muted-foreground mb-1">
         {icon}
         <span className="text-xs">{label}</span>
@@ -373,7 +375,7 @@ function Section({
     <div>
       <div className="flex items-center gap-2 mb-3">
         {icon}
-        <h3 className="font-serif font-semibold text-lg">{title}</h3>
+        <h3 className="font-semibold text-lg">{title}</h3>
       </div>
       {children}
     </div>
@@ -398,7 +400,7 @@ function ProfileCard({ profile }: { profile: FounderProfileSummary }) {
                   key={i}
                   className={cn(
                     "w-2 h-4 rounded-sm",
-                    i < profile.weeklyCapacityScore ? "bg-accent" : "bg-muted"
+                    i < profile.weeklyCapacityScore ? "bg-foreground" : "bg-muted"
                   )}
                 />
               ))}
@@ -457,7 +459,7 @@ function ProfileCard({ profile }: { profile: FounderProfileSummary }) {
           </div>
         )}
         
-        <Button variant="subtle" className="w-full">
+        <Button variant="outline" className="w-full">
           Update preferences
           <ArrowRight className="w-4 h-4 ml-1" />
         </Button>

@@ -73,27 +73,30 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative">
+      {/* Subtle gradient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="font-serif text-2xl font-semibold mb-2">FounderFit</h1>
+          <h1 className="text-2xl font-semibold mb-2">FounderFit</h1>
           <p className="text-muted-foreground">Ideas that actually fit you.</p>
         </div>
         
-        <Card className="shadow-elevated">
+        <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-xl">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </CardTitle>
             <CardDescription>
               {isSignUp 
-                ? 'Start your journey to finding the perfect business idea' 
+                ? 'Start your journey to finding the perfect idea' 
                 : 'Sign in to access your personalized ideas'}
             </CardDescription>
           </CardHeader>
@@ -101,7 +104,7 @@ export default function Auth() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-sm text-destructive">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -110,14 +113,14 @@ export default function Auth() {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="pl-11"
                     required
                   />
                 </div>
@@ -126,14 +129,14 @@ export default function Auth() {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10"
+                    className="pl-11"
                     required
                     minLength={6}
                   />
@@ -175,7 +178,7 @@ export default function Auth() {
         </Card>
         
         <p className="text-center text-sm text-muted-foreground mt-6">
-          By continuing, you agree to our Terms of Service and Privacy Policy.
+          By continuing, you agree to our Terms and Privacy Policy.
         </p>
       </motion.div>
     </div>

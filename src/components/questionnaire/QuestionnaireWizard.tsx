@@ -287,11 +287,14 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
   };
   
   return (
-    <div className="min-h-screen gradient-hero flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative">
+      {/* Subtle gradient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+      
       {/* Header */}
-      <header className="p-6">
+      <header className="p-6 relative z-10">
         <div className="container mx-auto flex items-center justify-between">
-          <span className="font-serif text-xl font-semibold">FounderFit</span>
+          <span className="text-xl font-semibold">FounderFit</span>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               {currentStep + 1} of {questionSteps.length}
@@ -301,12 +304,12 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
       </header>
       
       {/* Progress */}
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 relative z-10">
         <Progress value={progress} className="h-1" />
       </div>
       
       {/* Question */}
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center justify-center p-6 relative z-10">
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -327,7 +330,7 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
       </main>
       
       {/* Navigation */}
-      <footer className="p-6 border-t bg-card/50 backdrop-blur-sm">
+      <footer className="p-6 border-t border-border/50 bg-card/50 backdrop-blur-sm relative z-10">
         <div className="container mx-auto flex items-center justify-between max-w-2xl">
           <Button
             variant="ghost"
@@ -368,7 +371,7 @@ interface QuestionRendererProps {
 function QuestionRenderer({ question, value, onChange }: QuestionRendererProps) {
   return (
     <div className="text-center">
-      <h2 className="text-2xl sm:text-3xl font-serif font-semibold mb-3">
+      <h2 className="text-2xl sm:text-3xl font-semibold mb-3">
         {question.question}
       </h2>
       {question.subtext && (
@@ -435,9 +438,9 @@ function ChoiceOptions({
           onClick={() => onChange(option.value)}
           className={cn(
             "p-4 rounded-xl border text-left transition-all duration-200",
-            "hover:border-accent/50 hover:bg-accent/5",
+            "hover:border-muted-foreground/50 hover:bg-secondary",
             value === option.value
-              ? "border-accent bg-accent/10 shadow-soft"
+              ? "border-foreground bg-secondary"
               : "border-border bg-card"
           )}
         >
@@ -469,8 +472,8 @@ function SliderInput({
   
   return (
     <div className="max-w-md mx-auto">
-      <div className="bg-card border rounded-xl p-8">
-        <div className="text-5xl font-serif font-bold text-accent mb-6">
+      <div className="bg-card border border-border/50 rounded-2xl p-8">
+        <div className="text-5xl font-semibold text-foreground mb-6">
           {displayValue}
         </div>
         <Slider
@@ -520,9 +523,9 @@ function MultiSelectOptions({
           onClick={() => toggleOption(option.value)}
           className={cn(
             "p-4 rounded-xl border text-left transition-all duration-200",
-            "hover:border-accent/50 hover:bg-accent/5",
+            "hover:border-muted-foreground/50 hover:bg-secondary",
             value.includes(option.value)
-              ? "border-accent bg-accent/10 shadow-soft"
+              ? "border-foreground bg-secondary"
               : "border-border bg-card"
           )}
         >
@@ -553,9 +556,9 @@ function BinaryOptions({
           onClick={() => onChange(option.value)}
           className={cn(
             "px-12 py-4 rounded-xl border text-lg font-medium transition-all duration-200",
-            "hover:border-accent/50",
+            "hover:border-muted-foreground/50",
             value === option.value
-              ? "border-accent bg-accent text-accent-foreground shadow-soft"
+              ? "border-foreground bg-foreground text-background"
               : "border-border bg-card"
           )}
         >
@@ -583,9 +586,9 @@ function TradeOffOptions({
           onClick={() => onChange(option.value)}
           className={cn(
             "flex-1 p-6 rounded-xl border text-center transition-all duration-200",
-            "hover:border-accent/50 hover:bg-accent/5",
+            "hover:border-muted-foreground/50 hover:bg-secondary",
             value === option.value
-              ? "border-accent bg-accent/10 shadow-soft"
+              ? "border-foreground bg-secondary"
               : "border-border bg-card"
           )}
         >

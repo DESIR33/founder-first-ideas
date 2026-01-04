@@ -4,19 +4,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive: "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground border-border",
-        // Custom variants for FounderFit
-        accent: "border-transparent bg-accent text-accent-foreground hover:bg-accent/80",
+        default: "border-transparent bg-primary text-primary-foreground",
+        secondary: "border-transparent bg-secondary text-secondary-foreground",
+        destructive: "border-transparent bg-destructive text-destructive-foreground",
+        outline: "border-border text-muted-foreground",
+        // Natural AI inspired variants
+        accent: "border-border/50 bg-secondary text-foreground",
         muted: "border-transparent bg-muted text-muted-foreground",
-        success: "border-transparent bg-success text-success-foreground",
-        skill: "border-accent/30 bg-accent/10 text-foreground",
+        success: "border-transparent bg-success/20 text-success",
+        skill: "border-border/30 bg-muted/50 text-foreground",
         tag: "border-border bg-secondary/50 text-muted-foreground hover:bg-secondary",
       },
     },
