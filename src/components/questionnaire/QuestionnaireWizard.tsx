@@ -419,37 +419,45 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
   };
   
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
-      {/* Subtle gradient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 flex flex-col relative overflow-hidden">
+      {/* Premium ambient glow */}
+      <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-radial from-accent/8 via-accent/4 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-gradient-radial from-muted/30 to-transparent rounded-full blur-3xl pointer-events-none" />
       
       {/* Header */}
-      <header className="p-6 relative z-10">
-        <div className="container mx-auto flex items-center justify-between">
-          <span className="text-xl font-semibold">FounderFit</span>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              {currentStep + 1} of {questionSteps.length}
+      <header className="px-6 pt-8 pb-4 relative z-10">
+        <div className="container mx-auto flex items-center justify-between max-w-2xl">
+          <span className="text-lg font-semibold tracking-tight">FounderFit</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground bg-secondary/60 px-3 py-1.5 rounded-full">
+              {currentStep + 1} / {questionSteps.length}
             </span>
           </div>
         </div>
       </header>
       
-      {/* Progress */}
-      <div className="container mx-auto px-6 relative z-10">
-        <Progress value={progress} className="h-1" />
+      {/* Progress - pill style */}
+      <div className="container mx-auto px-6 max-w-2xl relative z-10">
+        <div className="h-1.5 bg-secondary/60 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-gradient-to-r from-accent/80 to-accent rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          />
+        </div>
       </div>
       
       {/* Question */}
-      <main className="flex-1 flex items-center justify-center p-6 relative z-10">
+      <main className="flex-1 flex items-center justify-center px-6 py-8 relative z-10">
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentQuestion.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
               <QuestionRenderer
                 question={currentQuestion}
@@ -461,38 +469,41 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
         </div>
       </main>
       
-      {/* Navigation */}
-      <footer className="p-6 border-t border-border/50 bg-card/50 backdrop-blur-sm relative z-10">
-        <div className="container mx-auto flex items-center justify-between max-w-2xl">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Back
-          </Button>
-          
-          <div className="flex items-center gap-3">
-            {!currentQuestion.required && !answers[currentQuestion.id] && (
-              <Button
-                variant="ghost"
-                onClick={handleNext}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Skip
-              </Button>
-            )}
-            
+      {/* Navigation - floating pill style */}
+      <footer className="p-6 relative z-10">
+        <div className="container mx-auto max-w-2xl">
+          <div className="bg-card/80 backdrop-blur-xl border border-border/30 rounded-2xl p-4 shadow-soft flex items-center justify-between">
             <Button
-              variant="wizard"
-              onClick={handleNext}
-              disabled={!canProceed}
-              className="w-40"
+              variant="ghost"
+              onClick={handleBack}
+              disabled={currentStep === 0}
+              className="rounded-xl text-muted-foreground hover:text-foreground"
             >
-              {isLastStep ? 'See My Results' : 'Continue'}
-              <ChevronRight className="w-4 h-4 ml-1" />
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Back
             </Button>
+            
+            <div className="flex items-center gap-3">
+              {!currentQuestion.required && !answers[currentQuestion.id] && (
+                <Button
+                  variant="ghost"
+                  onClick={handleNext}
+                  className="text-muted-foreground hover:text-foreground rounded-xl"
+                >
+                  Skip
+                </Button>
+              )}
+              
+              <Button
+                variant="wizard"
+                onClick={handleNext}
+                disabled={!canProceed}
+                className="min-w-[140px] rounded-xl bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+              >
+                {isLastStep ? 'See My Results' : 'Continue'}
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
           </div>
         </div>
       </footer>
@@ -509,68 +520,86 @@ interface QuestionRendererProps {
 function QuestionRenderer({ question, value, onChange }: QuestionRendererProps) {
   return (
     <div className="text-center">
-      <h2 className="text-2xl sm:text-3xl font-semibold mb-3">
+      <motion.h2 
+        className="text-2xl sm:text-3xl font-semibold mb-3 tracking-tight"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.3 }}
+      >
         {question.question}
-      </h2>
+      </motion.h2>
       {question.subtext && (
-        <p className="text-muted-foreground mb-8">{question.subtext}</p>
+        <motion.p 
+          className="text-muted-foreground mb-10 max-w-md mx-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+        >
+          {question.subtext}
+        </motion.p>
       )}
       
-      {question.type === 'choice' && (
-        <ChoiceOptions
-          options={question.options!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'slider' && (
-        <DescriptiveSlider
-          config={question.sliderConfig!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'hours-slider' && (
-        <HoursSliderInput
-          config={question.sliderConfig!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'multi-select' && (
-        <MultiSelectOptions
-          options={question.options!}
-          value={value || []}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'binary' && (
-        <BinaryOptions
-          options={question.options!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'trade-off' && (
-        <TradeOffOptions
-          config={question.tradeOffConfig!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
-      
-      {question.type === 'text' && (
-        <TextInput
-          config={question.textConfig!}
-          value={value}
-          onChange={onChange}
-        />
-      )}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.35 }}
+      >
+        {question.type === 'choice' && (
+          <ChoiceOptions
+            options={question.options!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'slider' && (
+          <DescriptiveSlider
+            config={question.sliderConfig!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'hours-slider' && (
+          <HoursSliderInput
+            config={question.sliderConfig!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'multi-select' && (
+          <MultiSelectOptions
+            options={question.options!}
+            value={value || []}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'binary' && (
+          <BinaryOptions
+            options={question.options!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'trade-off' && (
+          <TradeOffOptions
+            config={question.tradeOffConfig!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+        
+        {question.type === 'text' && (
+          <TextInput
+            config={question.textConfig!}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+      </motion.div>
     </div>
   );
 }
@@ -586,28 +615,49 @@ function ChoiceOptions({
 }) {
   return (
     <div className="grid gap-3 max-w-md mx-auto">
-      {options?.map((option) => (
-        <button
+      {options?.map((option, index) => (
+        <motion.button
           key={option.value}
           onClick={() => onChange(option.value)}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05, duration: 0.3 }}
           className={cn(
-            "p-4 rounded-xl border text-left transition-all duration-200",
-            "hover:border-muted-foreground/50 hover:bg-secondary",
+            "p-4 rounded-2xl border text-left transition-all duration-300 group",
+            "hover:scale-[1.02] hover:shadow-soft",
             value === option.value
-              ? "border-foreground bg-secondary"
-              : "border-border bg-card"
+              ? "border-foreground/20 bg-foreground/5 shadow-soft"
+              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80"
           )}
         >
-          <div className="flex items-center gap-3">
-            {option.icon && <span className="text-2xl">{option.icon}</span>}
-            <div>
-              <p className="font-medium">{option.label}</p>
+          <div className="flex items-center gap-4">
+            {option.icon && (
+              <span className="text-2xl w-10 h-10 flex items-center justify-center bg-secondary/60 rounded-xl">
+                {option.icon}
+              </span>
+            )}
+            <div className="flex-1">
+              <p className="font-medium text-foreground">{option.label}</p>
               {option.description && (
-                <p className="text-sm text-muted-foreground">{option.description}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{option.description}</p>
+              )}
+            </div>
+            <div className={cn(
+              "w-5 h-5 rounded-full border-2 transition-all duration-200 flex items-center justify-center",
+              value === option.value
+                ? "border-foreground bg-foreground"
+                : "border-border/60 group-hover:border-muted-foreground/50"
+            )}>
+              {value === option.value && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-2 h-2 bg-background rounded-full"
+                />
               )}
             </div>
           </div>
-        </button>
+        </motion.button>
       ))}
     </div>
   );
@@ -634,31 +684,35 @@ function HoursSliderInput({
   
   return (
     <div className="max-w-md mx-auto">
-      <div className="bg-card border border-border/50 rounded-2xl p-8">
-        {/* Number input */}
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Input
-            type="number"
-            value={displayValue}
-            onChange={handleInputChange}
-            min={config.min}
-            max={config.max}
-            className="w-24 text-center text-3xl font-semibold h-16 bg-secondary border-border"
-          />
-          <span className="text-xl text-muted-foreground">hours</span>
+      <div className="bg-card/60 backdrop-blur-sm border border-border/30 rounded-3xl p-8 shadow-soft">
+        {/* Number input - large pill style */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="relative">
+            <Input
+              type="number"
+              value={displayValue}
+              onChange={handleInputChange}
+              min={config.min}
+              max={config.max}
+              className="w-28 text-center text-4xl font-semibold h-20 bg-secondary/50 border-border/30 rounded-2xl focus:ring-accent/30"
+            />
+          </div>
+          <span className="text-lg text-muted-foreground font-medium">hours/week</span>
         </div>
         
-        <Slider
-          value={[displayValue]}
-          onValueChange={([v]) => onChange(v)}
-          min={config.min}
-          max={config.max}
-          step={config.step}
-          className="mb-4"
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{config.minLabel}</span>
-          <span>{config.maxLabel}</span>
+        <div className="px-2">
+          <Slider
+            value={[displayValue]}
+            onValueChange={([v]) => onChange(v)}
+            min={config.min}
+            max={config.max}
+            step={config.step}
+            className="mb-4"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground font-medium mt-2">
+            <span className="bg-secondary/40 px-2 py-1 rounded-full">{config.minLabel}</span>
+            <span className="bg-secondary/40 px-2 py-1 rounded-full">{config.maxLabel}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -702,30 +756,33 @@ function DescriptiveSlider({
   
   return (
     <div className="max-w-md mx-auto">
-      <div className="bg-card border border-border/50 rounded-2xl p-8">
-        {/* Current state label */}
+      <div className="bg-card/60 backdrop-blur-sm border border-border/30 rounded-3xl p-8 shadow-soft">
+        {/* Current state label - pill style */}
         {currentLabel && (
           <motion.div 
             key={currentLabel}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xl font-medium text-foreground mb-6 min-h-[28px]"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="inline-block text-lg font-medium text-foreground mb-8 bg-secondary/50 px-5 py-2.5 rounded-full"
           >
             {currentLabel}
           </motion.div>
         )}
         
-        <Slider
-          value={[displayValue]}
-          onValueChange={([v]) => onChange(v)}
-          min={config.min}
-          max={config.max}
-          step={config.step}
-          className="mb-4"
-        />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>{config.minLabel}</span>
-          <span>{config.maxLabel}</span>
+        <div className="px-2">
+          <Slider
+            value={[displayValue]}
+            onValueChange={([v]) => onChange(v)}
+            min={config.min}
+            max={config.max}
+            step={config.step}
+            className="mb-4"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground font-medium mt-2">
+            <span className="bg-secondary/40 px-2 py-1 rounded-full">{config.minLabel}</span>
+            <span className="bg-secondary/40 px-2 py-1 rounded-full">{config.maxLabel}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -756,23 +813,48 @@ function MultiSelectOptions({
   
   return (
     <div className="grid sm:grid-cols-2 gap-3 max-w-lg mx-auto">
-      {options?.map((option) => (
-        <button
+      {options?.map((option, index) => (
+        <motion.button
           key={option.value}
           onClick={() => toggleOption(option.value)}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05, duration: 0.3 }}
           className={cn(
-            "p-4 rounded-xl border text-left transition-all duration-200",
-            "hover:border-muted-foreground/50 hover:bg-secondary",
+            "p-4 rounded-2xl border text-left transition-all duration-300 group relative",
+            "hover:scale-[1.02] hover:shadow-soft",
             value.includes(option.value)
-              ? "border-foreground bg-secondary"
-              : "border-border bg-card"
+              ? "border-foreground/20 bg-foreground/5 shadow-soft"
+              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80"
           )}
         >
-          <p className="font-medium">{option.label}</p>
-          {option.description && (
-            <p className="text-sm text-muted-foreground">{option.description}</p>
-          )}
-        </button>
+          <div className="flex items-start gap-3">
+            <div className={cn(
+              "w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center mt-0.5 flex-shrink-0",
+              value.includes(option.value)
+                ? "border-foreground bg-foreground"
+                : "border-border/60 group-hover:border-muted-foreground/50"
+            )}>
+              {value.includes(option.value) && (
+                <motion.svg 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-3 h-3 text-background" 
+                  viewBox="0 0 12 12" 
+                  fill="none"
+                >
+                  <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </motion.svg>
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-foreground">{option.label}</p>
+              {option.description && (
+                <p className="text-sm text-muted-foreground mt-0.5">{option.description}</p>
+              )}
+            </div>
+          </div>
+        </motion.button>
       ))}
     </div>
   );
@@ -789,20 +871,23 @@ function BinaryOptions({
 }) {
   return (
     <div className="flex gap-4 justify-center flex-wrap">
-      {options?.map((option) => (
-        <button
+      {options?.map((option, index) => (
+        <motion.button
           key={option.value}
           onClick={() => onChange(option.value)}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: index * 0.1, duration: 0.3 }}
           className={cn(
-            "px-8 py-4 rounded-xl border text-lg font-medium transition-all duration-200",
-            "hover:border-muted-foreground/50",
+            "px-8 py-4 rounded-2xl border text-lg font-medium transition-all duration-300",
+            "hover:scale-[1.03] shadow-soft",
             value === option.value
-              ? "border-foreground bg-foreground text-background"
-              : "border-border bg-card"
+              ? "border-foreground/20 bg-foreground text-background"
+              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80"
           )}
         >
           {option.label}
-        </button>
+        </motion.button>
       ))}
     </div>
   );
@@ -819,21 +904,24 @@ function TradeOffOptions({
 }) {
   return (
     <div className="flex gap-4 max-w-lg mx-auto">
-      {[config!.optionA, config!.optionB].map((option) => (
-        <button
+      {[config!.optionA, config!.optionB].map((option, index) => (
+        <motion.button
           key={option.value}
           onClick={() => onChange(option.value)}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1, duration: 0.3 }}
           className={cn(
-            "flex-1 p-6 rounded-xl border text-center transition-all duration-200",
-            "hover:border-muted-foreground/50 hover:bg-secondary",
+            "flex-1 p-6 rounded-2xl border text-center transition-all duration-300",
+            "hover:scale-[1.02] shadow-soft",
             value === option.value
-              ? "border-foreground bg-secondary"
-              : "border-border bg-card"
+              ? "border-foreground/20 bg-foreground/5"
+              : "border-border/40 bg-card/60 backdrop-blur-sm hover:border-border/60 hover:bg-card/80"
           )}
         >
-          <p className="font-semibold mb-1">{option.label}</p>
+          <p className="font-semibold mb-1 text-foreground">{option.label}</p>
           <p className="text-sm text-muted-foreground">{option.description}</p>
-        </button>
+        </motion.button>
       ))}
     </div>
   );
@@ -855,14 +943,14 @@ function TextInput({
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={config.placeholder}
-          className="min-h-[120px] bg-card border-border/50 text-base"
+          className="min-h-[140px] bg-card/60 backdrop-blur-sm border-border/30 text-base rounded-2xl p-4 shadow-soft focus:ring-accent/30 resize-none"
         />
       ) : (
         <Input
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={config.placeholder}
-          className="bg-card border-border/50 text-base h-12"
+          className="bg-card/60 backdrop-blur-sm border-border/30 text-base h-14 rounded-2xl px-5 shadow-soft focus:ring-accent/30"
         />
       )}
     </div>
