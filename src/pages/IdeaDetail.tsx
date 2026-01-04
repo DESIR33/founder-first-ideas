@@ -36,10 +36,20 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BusinessIdea } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
-import { getSavedIdeas, saveIdea, removeSavedIdea, getIdeaNotes, IdeaNote } from '@/lib/profileService';
+import { 
+  getSavedIdeas, 
+  saveIdea, 
+  removeSavedIdea, 
+  getIdeaNotes, 
+  IdeaNote,
+  getCollections,
+  getIdeaCollectionIds,
+  IdeaCollection
+} from '@/lib/profileService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { IdeaNotes } from '@/components/ideas/IdeaNotes';
+import { AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
 
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +58,8 @@ export default function IdeaDetail() {
   const [isSaved, setIsSaved] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [notes, setNotes] = useState<IdeaNote[]>([]);
+  const [collections, setCollections] = useState<IdeaCollection[]>([]);
+  const [ideaCollectionIds, setIdeaCollectionIds] = useState<string[]>([]);
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -73,9 +85,15 @@ export default function IdeaDetail() {
           setIdea(foundIdea);
           setIsSaved(true);
           
-          // Load notes for this idea
-          const ideaNotes = await getIdeaNotes(user.id, id);
+          // Load notes and collections for this idea
+          const [ideaNotes, userCollections, collectionIds] = await Promise.all([
+            getIdeaNotes(user.id, id),
+            getCollections(user.id),
+            getIdeaCollectionIds(user.id, id),
+          ]);
           setNotes(ideaNotes);
+          setCollections(userCollections);
+          setIdeaCollectionIds(collectionIds);
         } else {
           toast({
             title: "Idea not found",
@@ -302,7 +320,36 @@ export default function IdeaDetail() {
               <RefreshCw className="w-4 h-4 mr-2" />
               Get New Idea
             </Button>
+            
+            {user && idea && collections.length > 0 && (
+              <AddToCollectionDialog
+                userId={user.id}
+                ideaId={idea.id}
+                collections={collections}
+                currentCollectionIds={ideaCollectionIds}
+                onUpdate={setIdeaCollectionIds}
+              />
+            )}
           </div>
+          
+          {/* Collection Tags */}
+          {ideaCollectionIds.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-8">
+              {ideaCollectionIds.map(collectionId => {
+                const collection = collections.find(c => c.id === collectionId);
+                if (!collection) return null;
+                return (
+                  <span 
+                    key={collectionId}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/50 text-sm"
+                  >
+                    <span className={cn("w-2.5 h-2.5 rounded-full", getColorClass(collection.color))} />
+                    {collection.name}
+                  </span>
+                );
+              })}
+            </div>
+          )}
 
           {/* Content Sections */}
           <div className="space-y-10">

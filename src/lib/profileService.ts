@@ -280,3 +280,136 @@ export async function getNoteCounts(userId: string, ideaIds: string[]): Promise<
   });
   return counts;
 }
+
+// ============= Idea Collections =============
+
+export interface IdeaCollection {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const COLLECTION_COLORS = [
+  'gray', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink'
+] as const;
+
+// Get all collections for a user
+export async function getCollections(userId: string): Promise<IdeaCollection[]> {
+  const { data, error } = await supabase
+    .from('idea_collections')
+    .select('*')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
+    
+  if (error) throw error;
+  return data || [];
+}
+
+// Create a new collection
+export async function createCollection(userId: string, name: string, color: string = 'gray'): Promise<IdeaCollection> {
+  const { data, error } = await supabase
+    .from('idea_collections')
+    .insert({
+      user_id: userId,
+      name: name.trim(),
+      color,
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+}
+
+// Update a collection
+export async function updateCollection(collectionId: string, updates: { name?: string; color?: string }): Promise<IdeaCollection> {
+  const { data, error } = await supabase
+    .from('idea_collections')
+    .update(updates)
+    .eq('id', collectionId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+}
+
+// Delete a collection
+export async function deleteCollection(collectionId: string): Promise<void> {
+  const { error } = await supabase
+    .from('idea_collections')
+    .delete()
+    .eq('id', collectionId);
+    
+  if (error) throw error;
+}
+
+// Add idea to collection
+export async function addIdeaToCollection(userId: string, collectionId: string, ideaId: string): Promise<void> {
+  const { error } = await supabase
+    .from('idea_collection_items')
+    .insert({
+      user_id: userId,
+      collection_id: collectionId,
+      idea_id: ideaId,
+    });
+    
+  if (error && error.code !== '23505') throw error; // Ignore duplicate key error
+}
+
+// Remove idea from collection
+export async function removeIdeaFromCollection(collectionId: string, ideaId: string): Promise<void> {
+  const { error } = await supabase
+    .from('idea_collection_items')
+    .delete()
+    .eq('collection_id', collectionId)
+    .eq('idea_id', ideaId);
+    
+  if (error) throw error;
+}
+
+// Get collection IDs for an idea
+export async function getIdeaCollectionIds(userId: string, ideaId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('idea_collection_items')
+    .select('collection_id')
+    .eq('user_id', userId)
+    .eq('idea_id', ideaId);
+    
+  if (error) throw error;
+  return data?.map(row => row.collection_id) || [];
+}
+
+// Get all ideas in a collection
+export async function getCollectionIdeaIds(collectionId: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('idea_collection_items')
+    .select('idea_id')
+    .eq('collection_id', collectionId);
+    
+  if (error) throw error;
+  return data?.map(row => row.idea_id) || [];
+}
+
+// Get collection counts for multiple ideas
+export async function getIdeaCollectionCounts(userId: string, ideaIds: string[]): Promise<Record<string, string[]>> {
+  if (ideaIds.length === 0) return {};
+  
+  const { data, error } = await supabase
+    .from('idea_collection_items')
+    .select('idea_id, collection_id')
+    .eq('user_id', userId)
+    .in('idea_id', ideaIds);
+    
+  if (error) throw error;
+  
+  const mapping: Record<string, string[]> = {};
+  data?.forEach(row => {
+    if (!mapping[row.idea_id]) mapping[row.idea_id] = [];
+    mapping[row.idea_id].push(row.collection_id);
+  });
+  return mapping;
+}

@@ -35,6 +35,65 @@ export type Database = {
         }
         Relationships: []
       }
+      idea_collection_items: {
+        Row: {
+          added_at: string
+          collection_id: string
+          id: string
+          idea_id: string
+          user_id: string
+        }
+        Insert: {
+          added_at?: string
+          collection_id: string
+          id?: string
+          idea_id: string
+          user_id: string
+        }
+        Update: {
+          added_at?: string
+          collection_id?: string
+          id?: string
+          idea_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idea_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "idea_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idea_collections: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       idea_notes: {
         Row: {
           content: string
