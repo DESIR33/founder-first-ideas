@@ -165,6 +165,17 @@ export async function getSavedIdeas(userId: string): Promise<BusinessIdea[]> {
   return data?.map(row => row.idea_data as unknown as BusinessIdea) || [];
 }
 
+// Remove a saved idea
+export async function removeSavedIdea(userId: string, ideaId: string) {
+  const { error } = await supabase
+    .from('saved_ideas')
+    .delete()
+    .eq('user_id', userId)
+    .eq('idea_id', ideaId);
+    
+  if (error) throw error;
+}
+
 // Dismiss an idea
 export async function dismissIdea(userId: string, ideaId: string) {
   const { error } = await supabase
