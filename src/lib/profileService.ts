@@ -198,3 +198,85 @@ export async function getDismissedIdeaIds(userId: string): Promise<string[]> {
   if (error) throw error;
   return data?.map(row => row.idea_id) || [];
 }
+
+// ============= Idea Notes =============
+
+export interface IdeaNote {
+  id: string;
+  user_id: string;
+  idea_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Get notes for an idea
+export async function getIdeaNotes(userId: string, ideaId: string): Promise<IdeaNote[]> {
+  const { data, error } = await supabase
+    .from('idea_notes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('idea_id', ideaId)
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data || [];
+}
+
+// Add a note to an idea
+export async function addIdeaNote(userId: string, ideaId: string, content: string): Promise<IdeaNote> {
+  const { data, error } = await supabase
+    .from('idea_notes')
+    .insert({
+      user_id: userId,
+      idea_id: ideaId,
+      content: content.trim(),
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+}
+
+// Update a note
+export async function updateIdeaNote(noteId: string, content: string): Promise<IdeaNote> {
+  const { data, error } = await supabase
+    .from('idea_notes')
+    .update({ content: content.trim() })
+    .eq('id', noteId)
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+}
+
+// Delete a note
+export async function deleteIdeaNote(noteId: string): Promise<void> {
+  const { error } = await supabase
+    .from('idea_notes')
+    .delete()
+    .eq('id', noteId);
+    
+  if (error) throw error;
+}
+
+// Get note count for multiple ideas (for list view)
+export async function getNoteCounts(userId: string, ideaIds: string[]): Promise<Record<string, number>> {
+  if (ideaIds.length === 0) return {};
+  
+  const { data, error } = await supabase
+    .from('idea_notes')
+    .select('idea_id')
+    .eq('user_id', userId)
+    .in('idea_id', ideaIds);
+    
+  if (error) throw error;
+  
+  const counts: Record<string, number> = {};
+  data?.forEach(row => {
+    counts[row.idea_id] = (counts[row.idea_id] || 0) + 1;
+  });
+  return counts;
+}

@@ -15,7 +15,8 @@ import {
   LogOut,
   ChevronDown,
   ChevronUp,
-  ExternalLink
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +42,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BusinessIdea } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
-import { getSavedIdeas, removeSavedIdea } from '@/lib/profileService';
+import { getSavedIdeas, removeSavedIdea, getNoteCounts } from '@/lib/profileService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -52,6 +53,7 @@ export default function SavedIdeas() {
   const [sortBy, setSortBy] = useState<'recent' | 'matchScore' | 'risk'>('recent');
   const [filterRisk, setFilterRisk] = useState<'all' | 'low' | 'medium' | 'high'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [noteCounts, setNoteCounts] = useState<Record<string, number>>({});
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -67,6 +69,13 @@ export default function SavedIdeas() {
       try {
         const savedIdeas = await getSavedIdeas(user.id);
         setIdeas(savedIdeas);
+        
+        // Load note counts for all ideas
+        if (savedIdeas.length > 0) {
+          const ideaIds = savedIdeas.map(i => i.id);
+          const counts = await getNoteCounts(user.id, ideaIds);
+          setNoteCounts(counts);
+        }
       } catch (error) {
         console.error('Error loading saved ideas:', error);
         toast({
@@ -246,6 +255,7 @@ export default function SavedIdeas() {
                     onToggleExpand={() => setExpandedId(expandedId === idea.id ? null : idea.id)}
                     onRemove={() => handleRemoveIdea(idea.id)}
                     onViewDetails={() => navigate(`/idea/${idea.id}`)}
+                    noteCount={noteCounts[idea.id] || 0}
                   />
                 </motion.div>
               ))}
@@ -263,9 +273,10 @@ interface SavedIdeaCardProps {
   onToggleExpand: () => void;
   onRemove: () => void;
   onViewDetails: () => void;
+  noteCount: number;
 }
 
-function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove, onViewDetails }: SavedIdeaCardProps) {
+function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove, onViewDetails, noteCount }: SavedIdeaCardProps) {
   return (
     <Card className="overflow-hidden transition-all">
       {/* Collapsed Header */}
@@ -320,6 +331,12 @@ function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove, onViewDetai
             <TrendingUp className="w-3 h-3" />
             <span>{idea.potentialMonthlyRevenue}</span>
           </div>
+          {noteCount > 0 && (
+            <div className="flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              <span>{noteCount} note{noteCount !== 1 ? 's' : ''}</span>
+            </div>
+          )}
         </div>
       </div>
       

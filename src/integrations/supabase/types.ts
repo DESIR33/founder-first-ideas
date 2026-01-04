@@ -35,6 +35,33 @@ export type Database = {
         }
         Relationships: []
       }
+      idea_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          idea_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          idea_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          idea_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           anti_patterns: string[] | null
