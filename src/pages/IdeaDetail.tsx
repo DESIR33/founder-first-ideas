@@ -54,6 +54,7 @@ import { cn } from '@/lib/utils';
 import { IdeaNotes } from '@/components/ideas/IdeaNotes';
 import { AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
 import { ScoreBreakdown } from '@/components/ideas/ScoreBreakdown';
+import { ValidationChecklist } from '@/components/ideas/ValidationChecklist';
 
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -471,6 +472,14 @@ export default function IdeaDetail() {
                 </CardContent>
               </Card>
             </Section>
+            {/* Validation Checklist */}
+            {user && idea && (
+              <ValidationChecklist
+                ideaId={idea.id}
+                userId={user.id}
+              />
+            )}
+            
             {/* Notes Section */}
             {user && idea && (
               <IdeaNotes
