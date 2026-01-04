@@ -19,7 +19,8 @@ import {
   Loader2,
   Share2,
   RefreshCw,
-  BarChart3
+  BarChart3,
+  Focus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { BusinessIdea, FounderProfile } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMode } from '@/hooks/useDecisionMode';
 import { 
   getSavedIdeas, 
   saveIdea, 
@@ -55,6 +57,8 @@ import { IdeaNotes } from '@/components/ideas/IdeaNotes';
 import { AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
 import { ScoreBreakdown } from '@/components/ideas/ScoreBreakdown';
 import { ValidationChecklist } from '@/components/ideas/ValidationChecklist';
+import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
+import { CommitToIdeaDialog } from '@/components/decision-mode/CommitToIdeaDialog';
 
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -68,8 +72,11 @@ export default function IdeaDetail() {
   const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   
   const { user, signOut } = useAuth();
+  const { isActive: isDecisionModeActive, activeIdeaId } = useDecisionMode();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const isActiveIdea = isDecisionModeActive && activeIdeaId === id;
 
   useEffect(() => {
     async function loadIdea() {
@@ -216,6 +223,9 @@ export default function IdeaDetail() {
 
   return (
     <div className="min-h-screen bg-background relative">
+      {/* Decision Mode Banner */}
+      <DecisionModeBanner />
+      
       {/* Subtle gradient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
       
@@ -296,10 +306,23 @@ export default function IdeaDetail() {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 mb-10 pb-8 border-b border-border/50">
+            {/* Commit to Idea Button - Primary CTA when saved */}
+            {isSaved && !isDecisionModeActive && idea && (
+              <CommitToIdeaDialog ideaId={idea.id} ideaTitle={idea.title} />
+            )}
+            
+            {/* Active Idea Badge */}
+            {isActiveIdea && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20">
+                <Focus className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">You're committed to this idea</span>
+              </div>
+            )}
+            
             {isSaved ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" disabled={actionLoading}>
+                  <Button variant="outline" disabled={actionLoading || isActiveIdea}>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Remove from Saved
                   </Button>
@@ -318,7 +341,7 @@ export default function IdeaDetail() {
                 </AlertDialogContent>
               </AlertDialog>
             ) : (
-              <Button onClick={handleSaveIdea} disabled={actionLoading}>
+              <Button onClick={handleSaveIdea} disabled={actionLoading || isDecisionModeActive}>
                 {actionLoading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -328,10 +351,12 @@ export default function IdeaDetail() {
               </Button>
             )}
             
-            <Button variant="outline" onClick={() => navigate('/')}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Get New Idea
-            </Button>
+            {!isDecisionModeActive && (
+              <Button variant="outline" onClick={() => navigate('/')}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Get New Idea
+              </Button>
+            )}
             
             {user && idea && collections.length > 0 && (
               <AddToCollectionDialog

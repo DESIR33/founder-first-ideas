@@ -165,6 +165,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_idea_id: string | null
           anti_patterns: string[] | null
           audience_platform: string | null
           audience_size: number | null
@@ -187,6 +188,7 @@ export type Database = {
           id: string
           ideal_business_models: string[] | null
           industry_experience: string[] | null
+          is_decision_mode_active: boolean
           marketing_comfort: number | null
           monthly_income_goal: number | null
           needs_predictability: boolean | null
@@ -205,6 +207,7 @@ export type Database = {
           weekly_capacity_score: number | null
         }
         Insert: {
+          active_idea_id?: string | null
           anti_patterns?: string[] | null
           audience_platform?: string | null
           audience_size?: number | null
@@ -227,6 +230,7 @@ export type Database = {
           id?: string
           ideal_business_models?: string[] | null
           industry_experience?: string[] | null
+          is_decision_mode_active?: boolean
           marketing_comfort?: number | null
           monthly_income_goal?: number | null
           needs_predictability?: boolean | null
@@ -245,6 +249,7 @@ export type Database = {
           weekly_capacity_score?: number | null
         }
         Update: {
+          active_idea_id?: string | null
           anti_patterns?: string[] | null
           audience_platform?: string | null
           audience_size?: number | null
@@ -267,6 +272,7 @@ export type Database = {
           id?: string
           ideal_business_models?: string[] | null
           industry_experience?: string[] | null
+          is_decision_mode_active?: boolean
           marketing_comfort?: number | null
           monthly_income_goal?: number | null
           needs_predictability?: boolean | null

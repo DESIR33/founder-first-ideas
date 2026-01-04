@@ -14,13 +14,15 @@ import {
   ArrowRight,
   Lightbulb,
   LogOut,
-  Loader2
+  Loader2,
+  Focus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BusinessIdea, FounderProfile, FounderProfileSummary } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
+import { useDecisionMode } from '@/hooks/useDecisionMode';
 import { 
   fetchUserProfile, 
   mapDbProfileToFounderProfile, 
@@ -33,6 +35,8 @@ import {
 import { generateMatchingIdea } from '@/lib/ideaEngine';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
+import { DecisionModeTooltip } from '@/components/decision-mode/DecisionModeTooltip';
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -43,6 +47,7 @@ export function Dashboard() {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
   
   const { user, signOut } = useAuth();
+  const { isActive: isDecisionModeActive, activeIdeaId } = useDecisionMode();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -143,6 +148,64 @@ export function Dashboard() {
             Refresh
           </Button>
         </div>
+      </div>
+    );
+  }
+  
+  // If in Decision Mode, show focused view
+  if (isDecisionModeActive && activeIdeaId) {
+    return (
+      <div className="min-h-screen bg-background relative">
+        <DecisionModeBanner />
+        
+        {/* Subtle gradient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/20 to-transparent rounded-full blur-3xl pointer-events-none" />
+        
+        {/* Header */}
+        <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-40">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-semibold">FounderFit</span>
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" onClick={() => navigate('/saved')}>
+                  <Bookmark className="w-4 h-4 mr-2" />
+                  Saved ({savedIdeas.length})
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        <main className="container mx-auto px-6 py-8 relative z-10">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <Focus className="w-5 h-5 text-primary" />
+              <span className="font-medium">Decision Mode Active</span>
+            </div>
+            
+            <h1 className="text-3xl font-bold mb-4">
+              Time to Execute
+            </h1>
+            <p className="text-muted-foreground mb-8">
+              You've committed to an idea. New idea browsing is paused to help you focus on validation and execution.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" onClick={() => navigate(`/idea/${activeIdeaId}`)}>
+                <Focus className="w-4 h-4 mr-2" />
+                View Your Committed Idea
+              </Button>
+              <Button variant="outline" size="lg" onClick={() => navigate('/saved')}>
+                <Bookmark className="w-4 h-4 mr-2" />
+                View All Saved Ideas
+              </Button>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
