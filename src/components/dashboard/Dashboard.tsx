@@ -158,6 +158,10 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <span className="text-xl font-semibold">FounderFit</span>
             <div className="flex items-center gap-4">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/analytics')}>
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate('/saved')}>
                 <Bookmark className="w-4 h-4 mr-2" />
                 Saved ({savedIdeas.length})
