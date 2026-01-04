@@ -2,15 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroSection, HowItWorksSection, DifferentiatorSection, TargetAudienceSection, CTASection } from '@/components/landing/LandingSections';
 import { QuestionnaireWizard } from '@/components/questionnaire/QuestionnaireWizard';
+import { IdeaSynthesisFlow } from '@/components/synthesis';
 import { Dashboard } from '@/components/dashboard/Dashboard';
 import { useAuth } from '@/hooks/useAuth';
-import { fetchUserProfile } from '@/lib/profileService';
+import { fetchUserProfile, saveFounderProfile } from '@/lib/profileService';
+import { BusinessIdea, FounderProfile, FounderProfileSummary } from '@/types/founder';
 import { Loader2 } from 'lucide-react';
 
+type FlowState = 'landing' | 'questionnaire' | 'synthesis' | 'dashboard';
+
 const Index = () => {
-  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [flowState, setFlowState] = useState<FlowState>('landing');
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -21,7 +26,11 @@ const Index = () => {
       if (user) {
         try {
           const profile = await fetchUserProfile(user.id);
-          setHasCompletedOnboarding(profile?.has_completed_onboarding || false);
+          const completed = profile?.has_completed_onboarding || false;
+          setHasCompletedOnboarding(completed);
+          if (completed) {
+            setFlowState('dashboard');
+          }
         } catch (error) {
           console.error('Error fetching profile:', error);
         }
@@ -36,13 +45,29 @@ const Index = () => {
     if (!user) {
       navigate('/auth');
     } else {
-      setShowQuestionnaire(true);
+      setFlowState('questionnaire');
     }
   };
 
-  const handleQuestionnaireComplete = () => {
+  const handleQuestionnaireComplete = (profile: FounderProfile) => {
+    setFounderProfile(profile);
+    setFlowState('synthesis');
+  };
+
+  const handleSynthesisComplete = async (ideas: BusinessIdea[], summary: FounderProfileSummary) => {
+    if (user && founderProfile) {
+      try {
+        await saveFounderProfile(user.id, founderProfile, summary);
+      } catch (error) {
+        console.error('Error saving profile:', error);
+      }
+    }
     setHasCompletedOnboarding(true);
-    setShowQuestionnaire(false);
+    setFlowState('dashboard');
+  };
+
+  const handleIdeaSelect = (idea: BusinessIdea) => {
+    navigate(`/idea/${idea.id}`);
   };
 
   // Show loading while checking auth
@@ -55,12 +80,23 @@ const Index = () => {
   }
 
   // Show dashboard if logged in and onboarded
-  if (user && hasCompletedOnboarding) {
+  if (flowState === 'dashboard' && user && hasCompletedOnboarding) {
     return <Dashboard />;
   }
 
+  // Show synthesis flow
+  if (flowState === 'synthesis' && founderProfile) {
+    return (
+      <IdeaSynthesisFlow
+        profile={founderProfile}
+        onComplete={handleSynthesisComplete}
+        onIdeaSelect={handleIdeaSelect}
+      />
+    );
+  }
+
   // Show questionnaire if logged in but not onboarded
-  if (user && showQuestionnaire) {
+  if (flowState === 'questionnaire' && user) {
     return <QuestionnaireWizard onComplete={handleQuestionnaireComplete} />;
   }
 
