@@ -18,7 +18,10 @@ import {
   ExternalLink,
   MessageSquare,
   FolderPlus,
-  Folder
+  Folder,
+  Scale,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +70,8 @@ export default function SavedIdeas() {
   const [collections, setCollections] = useState<IdeaCollection[]>([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [ideaCollections, setIdeaCollections] = useState<Record<string, string[]>>({});
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -137,6 +142,20 @@ export default function SavedIdeas() {
     navigate('/auth');
   };
 
+  const toggleCompareId = (ideaId: string) => {
+    setCompareIds(prev => 
+      prev.includes(ideaId) 
+        ? prev.filter(id => id !== ideaId)
+        : prev.length < 4 ? [...prev, ideaId] : prev
+    );
+  };
+
+  const handleCompare = () => {
+    if (compareIds.length >= 2) {
+      navigate(`/compare?ids=${compareIds.join(',')}`);
+    }
+  };
+
   // Filter and sort ideas
   const filteredIdeas = ideas
     .filter(idea => {
@@ -189,13 +208,57 @@ export default function SavedIdeas() {
               </Button>
               <span className="text-xl font-semibold">Saved Ideas</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant={compareMode ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => {
+                  setCompareMode(!compareMode);
+                  if (compareMode) setCompareIds([]);
+                }}
+              >
+                <Scale className="w-4 h-4 mr-2" />
+                {compareMode ? 'Cancel' : 'Compare'}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
+      
+      {/* Compare Mode Bar */}
+      <AnimatePresence>
+        {compareMode && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="border-b border-border/50 bg-secondary/30"
+          >
+            <div className="container mx-auto px-6 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>
+                    {compareIds.length} selected 
+                    <span className="text-muted-foreground"> (select 2-4 ideas to compare)</span>
+                  </span>
+                </div>
+                <Button 
+                  size="sm" 
+                  disabled={compareIds.length < 2}
+                  onClick={handleCompare}
+                >
+                  Compare {compareIds.length} Ideas
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="container mx-auto px-6 py-8 relative z-10">
         <div className="flex gap-8">
@@ -301,6 +364,9 @@ export default function SavedIdeas() {
                       <SavedIdeaCard
                         idea={idea}
                         isExpanded={expandedId === idea.id}
+                        compareMode={compareMode}
+                        isSelectedForCompare={compareIds.includes(idea.id)}
+                        onToggleCompare={() => toggleCompareId(idea.id)}
                         onToggleExpand={() => setExpandedId(expandedId === idea.id ? null : idea.id)}
                         onRemove={() => handleRemoveIdea(idea.id)}
                         onViewDetails={() => navigate(`/idea/${idea.id}`)}
@@ -327,6 +393,9 @@ export default function SavedIdeas() {
 interface SavedIdeaCardProps {
   idea: BusinessIdea;
   isExpanded: boolean;
+  compareMode: boolean;
+  isSelectedForCompare: boolean;
+  onToggleCompare: () => void;
   onToggleExpand: () => void;
   onRemove: () => void;
   onViewDetails: () => void;
@@ -339,7 +408,10 @@ interface SavedIdeaCardProps {
 
 function SavedIdeaCard({ 
   idea, 
-  isExpanded, 
+  isExpanded,
+  compareMode,
+  isSelectedForCompare,
+  onToggleCompare,
   onToggleExpand, 
   onRemove, 
   onViewDetails, 
@@ -350,13 +422,26 @@ function SavedIdeaCard({
   onCollectionsUpdate
 }: SavedIdeaCardProps) {
   return (
-    <Card className="overflow-hidden transition-all">
+    <Card className={cn(
+      "overflow-hidden transition-all",
+      isSelectedForCompare && "ring-2 ring-foreground"
+    )}>
       {/* Collapsed Header */}
       <div 
         className="p-4 sm:p-6 cursor-pointer hover:bg-secondary/30 transition-colors"
-        onClick={onToggleExpand}
+        onClick={compareMode ? onToggleCompare : onToggleExpand}
       >
         <div className="flex items-start justify-between gap-4">
+          {/* Compare Checkbox */}
+          {compareMode && (
+            <div className="flex-shrink-0 pt-1">
+              {isSelectedForCompare ? (
+                <CheckSquare className="w-5 h-5 text-foreground" />
+              ) : (
+                <Square className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="text-xs">{idea.category}</Badge>

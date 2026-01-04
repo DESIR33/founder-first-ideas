@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import SavedIdeas from "./pages/SavedIdeas";
 import IdeaDetail from "./pages/IdeaDetail";
 import Analytics from "./pages/Analytics";
+import CompareIdeas from "./pages/CompareIdeas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/saved" element={<SavedIdeas />} />
             <Route path="/idea/:id" element={<IdeaDetail />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/compare" element={<CompareIdeas />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
