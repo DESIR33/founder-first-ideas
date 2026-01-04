@@ -13,21 +13,25 @@ import {
   CheckCircle2,
   Loader2,
   Scale,
-  Plus
+  Plus,
+  BarChart3,
+  TrendingDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { BusinessIdea } from '@/types/founder';
+import { BusinessIdea, FounderProfile } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
-import { getSavedIdeas } from '@/lib/profileService';
+import { getSavedIdeas, fetchUserProfile, mapDbProfileToFounderProfile } from '@/lib/profileService';
+import { calculateMatchBreakdown, MatchFactor } from '@/lib/matchScoring';
 import { cn } from '@/lib/utils';
 
 export default function CompareIdeas() {
   const [allIdeas, setAllIdeas] = useState<BusinessIdea[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -40,8 +44,13 @@ export default function CompareIdeas() {
 
     async function loadIdeas() {
       try {
-        const savedIdeas = await getSavedIdeas(user.id);
+        const [savedIdeas, dbProfile] = await Promise.all([
+          getSavedIdeas(user.id),
+          fetchUserProfile(user.id),
+        ]);
+        
         setAllIdeas(savedIdeas);
+        setFounderProfile(mapDbProfileToFounderProfile(dbProfile));
         
         // Get selected IDs from URL params
         const idsParam = searchParams.get('ids');
@@ -136,6 +145,7 @@ export default function CompareIdeas() {
                   <ComparisonCard
                     key={idea.id}
                     idea={idea}
+                    profile={founderProfile}
                     index={index}
                     onRemove={() => handleRemoveIdea(idea.id)}
                     onViewDetails={() => navigate(`/idea/${idea.id}`)}
@@ -189,12 +199,16 @@ export default function CompareIdeas() {
 
 interface ComparisonCardProps {
   idea: BusinessIdea;
+  profile: FounderProfile | null;
   index: number;
   onRemove: () => void;
   onViewDetails: () => void;
 }
 
-function ComparisonCard({ idea, index, onRemove, onViewDetails }: ComparisonCardProps) {
+function ComparisonCard({ idea, profile, index, onRemove, onViewDetails }: ComparisonCardProps) {
+  const breakdown = profile ? calculateMatchBreakdown(profile, idea) : null;
+  const positiveFactors = breakdown?.factors.filter(f => f.impact === 'positive') || [];
+  const negativeFactors = breakdown?.factors.filter(f => f.impact === 'negative') || [];
   return (
     <Card className="w-80 flex-shrink-0">
       <CardHeader className="pb-3 relative">
@@ -284,6 +298,33 @@ function ComparisonCard({ idea, index, onRemove, onViewDetails }: ComparisonCard
             )}
           </div>
         </div>
+        
+        {/* Score Factors Summary */}
+        {breakdown && (
+          <div className="space-y-2">
+            <h4 className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+              <BarChart3 className="w-3 h-3" />
+              Match Factors
+            </h4>
+            <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-1 text-success">
+                <TrendingUp className="w-3 h-3" />
+                <span>{positiveFactors.length} positive</span>
+              </div>
+              {negativeFactors.length > 0 && (
+                <div className="flex items-center gap-1 text-destructive">
+                  <TrendingDown className="w-3 h-3" />
+                  <span>{negativeFactors.length} challenge{negativeFactors.length !== 1 ? 's' : ''}</span>
+                </div>
+              )}
+            </div>
+            {positiveFactors.slice(0, 2).map((factor, i) => (
+              <div key={i} className="text-xs text-muted-foreground bg-success/10 px-2 py-1 rounded">
+                ✓ {factor.label}
+              </div>
+            ))}
+          </div>
+        )}
         
         {/* View Details Button */}
         <Button variant="outline" size="sm" className="w-full mt-2" onClick={onViewDetails}>

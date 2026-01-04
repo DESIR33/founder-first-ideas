@@ -18,7 +18,8 @@ import {
   LogOut,
   Loader2,
   Share2,
-  RefreshCw
+  RefreshCw,
+  BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { BusinessIdea } from '@/types/founder';
+import { BusinessIdea, FounderProfile } from '@/types/founder';
 import { useAuth } from '@/hooks/useAuth';
 import { 
   getSavedIdeas, 
@@ -44,12 +45,15 @@ import {
   IdeaNote,
   getCollections,
   getIdeaCollectionIds,
-  IdeaCollection
+  IdeaCollection,
+  fetchUserProfile,
+  mapDbProfileToFounderProfile
 } from '@/lib/profileService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { IdeaNotes } from '@/components/ideas/IdeaNotes';
 import { AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
+import { ScoreBreakdown } from '@/components/ideas/ScoreBreakdown';
 
 export default function IdeaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -60,6 +64,7 @@ export default function IdeaDetail() {
   const [notes, setNotes] = useState<IdeaNote[]>([]);
   const [collections, setCollections] = useState<IdeaCollection[]>([]);
   const [ideaCollectionIds, setIdeaCollectionIds] = useState<string[]>([]);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -78,8 +83,14 @@ export default function IdeaDetail() {
       }
       
       try {
-        const savedIdeas = await getSavedIdeas(user.id);
+        const [savedIdeas, dbProfile] = await Promise.all([
+          getSavedIdeas(user.id),
+          fetchUserProfile(user.id),
+        ]);
+        
         const foundIdea = savedIdeas.find(i => i.id === id);
+        const profile = mapDbProfileToFounderProfile(dbProfile);
+        setFounderProfile(profile);
         
         if (foundIdea) {
           setIdea(foundIdea);
@@ -353,6 +364,11 @@ export default function IdeaDetail() {
 
           {/* Content Sections */}
           <div className="space-y-10">
+            {/* Score Breakdown */}
+            {founderProfile && idea && (
+              <ScoreBreakdown profile={founderProfile} idea={idea} />
+            )}
+            
             {/* Why This Fits */}
             <Section 
               icon={<Lightbulb className="w-5 h-5 text-foreground" />}
