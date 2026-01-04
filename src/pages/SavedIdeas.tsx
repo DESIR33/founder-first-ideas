@@ -21,12 +21,14 @@ import {
   Folder,
   Scale,
   CheckSquare,
-  Square
+  Square,
+  ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import {
   Select,
   SelectContent,
@@ -55,6 +57,7 @@ import {
   getIdeaCollectionCounts,
   IdeaCollection
 } from '@/lib/profileService';
+import { getValidationProgress } from '@/lib/validationService';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { CollectionManager, AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
@@ -72,6 +75,7 @@ export default function SavedIdeas() {
   const [ideaCollections, setIdeaCollections] = useState<Record<string, string[]>>({});
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [validationProgress, setValidationProgress] = useState<Record<string, { completed: number; total: number }>>({});
   
   const { user, signOut } = useAuth();
   const { toast } = useToast();
@@ -93,15 +97,17 @@ export default function SavedIdeas() {
         setIdeas(savedIdeas);
         setCollections(userCollections);
         
-        // Load note counts and collection mappings for all ideas
+        // Load note counts, collection mappings, and validation progress for all ideas
         if (savedIdeas.length > 0) {
           const ideaIds = savedIdeas.map(i => i.id);
-          const [counts, collectionMappings] = await Promise.all([
+          const [counts, collectionMappings, progress] = await Promise.all([
             getNoteCounts(user.id, ideaIds),
             getIdeaCollectionCounts(user.id, ideaIds),
+            getValidationProgress(user.id, ideaIds),
           ]);
           setNoteCounts(counts);
           setIdeaCollections(collectionMappings);
+          setValidationProgress(progress);
         }
       } catch (error) {
         console.error('Error loading saved ideas:', error);
@@ -377,6 +383,7 @@ export default function SavedIdeas() {
                         onCollectionsUpdate={(newIds) => {
                           setIdeaCollections(prev => ({ ...prev, [idea.id]: newIds }));
                         }}
+                        validationProgress={validationProgress[idea.id]}
                       />
                     </motion.div>
                   ))}
@@ -404,6 +411,7 @@ interface SavedIdeaCardProps {
   ideaCollectionIds: string[];
   userId: string;
   onCollectionsUpdate: (newIds: string[]) => void;
+  validationProgress?: { completed: number; total: number };
 }
 
 function SavedIdeaCard({ 
@@ -419,8 +427,12 @@ function SavedIdeaCard({
   collections,
   ideaCollectionIds,
   userId,
-  onCollectionsUpdate
+  onCollectionsUpdate,
+  validationProgress
 }: SavedIdeaCardProps) {
+  const progressPercent = validationProgress && validationProgress.total > 0 
+    ? Math.round((validationProgress.completed / validationProgress.total) * 100) 
+    : null;
   return (
     <Card className={cn(
       "overflow-hidden transition-all",
@@ -492,6 +504,20 @@ function SavedIdeaCard({
             <div className="flex items-center gap-1">
               <MessageSquare className="w-3 h-3" />
               <span>{noteCount} note{noteCount !== 1 ? 's' : ''}</span>
+            </div>
+          )}
+          {progressPercent !== null && (
+            <div className="flex items-center gap-2">
+              <ClipboardCheck className="w-3 h-3" />
+              <div className="flex items-center gap-1.5">
+                <Progress value={progressPercent} className="w-16 h-1.5" />
+                <span className={cn(
+                  "text-xs font-medium",
+                  progressPercent === 100 && "text-green-500"
+                )}>
+                  {progressPercent}%
+                </span>
+              </div>
             </div>
           )}
         </div>
