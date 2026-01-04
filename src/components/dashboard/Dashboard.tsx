@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Bookmark, 
@@ -11,20 +12,138 @@ import {
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
-  Lightbulb
+  Lightbulb,
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BusinessIdea, FounderProfileSummary } from '@/types/founder';
-import { useFounderStore } from '@/store/founderStore';
+import { BusinessIdea, FounderProfile, FounderProfileSummary } from '@/types/founder';
+import { useAuth } from '@/hooks/useAuth';
+import { 
+  fetchUserProfile, 
+  mapDbProfileToFounderProfile, 
+  mapDbProfileToSummary,
+  getSavedIdeas,
+  getDismissedIdeaIds,
+  saveIdea as saveIdeaToDb,
+  dismissIdea as dismissIdeaToDb
+} from '@/lib/profileService';
+import { generateMatchingIdea } from '@/lib/ideaEngine';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 export function Dashboard() {
-  const { profileSummary, currentIdea, savedIdeas, saveIdea, dismissIdea, generateNewIdea } = useFounderStore();
+  const [loading, setLoading] = useState(true);
+  const [profileSummary, setProfileSummary] = useState<FounderProfileSummary | null>(null);
+  const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
+  const [currentIdea, setCurrentIdea] = useState<BusinessIdea | null>(null);
+  const [savedIdeas, setSavedIdeas] = useState<BusinessIdea[]>([]);
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function loadData() {
+      if (!user) return;
+      
+      try {
+        const [dbProfile, saved, dismissed] = await Promise.all([
+          fetchUserProfile(user.id),
+          getSavedIdeas(user.id),
+          getDismissedIdeaIds(user.id),
+        ]);
+        
+        const profile = mapDbProfileToFounderProfile(dbProfile);
+        const summary = mapDbProfileToSummary(dbProfile);
+        
+        setFounderProfile(profile);
+        setProfileSummary(summary);
+        setSavedIdeas(saved);
+        setDismissedIds(dismissed);
+        
+        // Generate initial idea
+        const idea = generateMatchingIdea(profile, summary, dismissed);
+        setCurrentIdea(idea);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load your profile. Please refresh.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadData();
+  }, [user]);
+
+  const handleSaveIdea = async () => {
+    if (!user || !currentIdea) return;
+    
+    try {
+      await saveIdeaToDb(user.id, currentIdea);
+      setSavedIdeas(prev => [currentIdea, ...prev]);
+      toast({
+        title: "Idea saved!",
+        description: "You can find it in your saved ideas.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save idea.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDismissIdea = async () => {
+    if (!user || !currentIdea || !founderProfile || !profileSummary) return;
+    
+    try {
+      await dismissIdeaToDb(user.id, currentIdea.id);
+      const newDismissedIds = [...dismissedIds, currentIdea.id];
+      setDismissedIds(newDismissedIds);
+      
+      // Generate new idea
+      const newIdea = generateMatchingIdea(founderProfile, profileSummary, newDismissedIds);
+      setCurrentIdea(newIdea);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to dismiss idea.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen gradient-hero flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      </div>
+    );
+  }
   
   if (!profileSummary || !currentIdea) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen gradient-hero flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">No ideas available at the moment.</p>
+          <Button variant="accent" className="mt-4" onClick={() => window.location.reload()}>
+            Refresh
+          </Button>
+        </div>
+      </div>
+    );
   }
   
   return (
@@ -38,6 +157,10 @@ export function Dashboard() {
               <Button variant="ghost" size="sm">
                 <Bookmark className="w-4 h-4 mr-2" />
                 Saved ({savedIdeas.length})
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
               </Button>
             </div>
           </div>
@@ -55,11 +178,8 @@ export function Dashboard() {
             >
               <IdeaCard 
                 idea={currentIdea} 
-                onSave={() => saveIdea(currentIdea.id)}
-                onDismiss={() => {
-                  dismissIdea(currentIdea.id);
-                  generateNewIdea();
-                }}
+                onSave={handleSaveIdea}
+                onDismiss={handleDismissIdea}
               />
             </motion.div>
           </div>
@@ -287,24 +407,28 @@ function ProfileCard({ profile }: { profile: FounderProfileSummary }) {
         </div>
         
         {/* Strengths */}
-        <div>
-          <h4 className="text-sm font-medium mb-2">Execution Strengths</h4>
-          <div className="flex flex-wrap gap-2">
-            {profile.executionStrengths.map((strength) => (
-              <Badge key={strength} variant="skill">{strength}</Badge>
-            ))}
+        {profile.executionStrengths.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Execution Strengths</h4>
+            <div className="flex flex-wrap gap-2">
+              {profile.executionStrengths.map((strength) => (
+                <Badge key={strength} variant="skill">{strength}</Badge>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Ideal Models */}
-        <div>
-          <h4 className="text-sm font-medium mb-2">Ideal Business Models</h4>
-          <div className="flex flex-wrap gap-2">
-            {profile.idealBusinessModels.map((model) => (
-              <Badge key={model} variant="secondary">{model}</Badge>
-            ))}
+        {profile.idealBusinessModels.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium mb-2">Ideal Business Models</h4>
+            <div className="flex flex-wrap gap-2">
+              {profile.idealBusinessModels.map((model) => (
+                <Badge key={model} variant="secondary">{model}</Badge>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Blind Spots */}
         {profile.blindSpots.length > 0 && (

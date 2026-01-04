@@ -1,11 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { QuestionStep } from '@/types/founder';
-import { useFounderStore } from '@/store/founderStore';
+import { QuestionStep, FounderProfile } from '@/types/founder';
+import { useAuth } from '@/hooks/useAuth';
+import { saveFounderProfile } from '@/lib/profileService';
+import { generateProfileSummary } from '@/lib/ideaEngine';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const questionSteps: QuestionStep[] = [
@@ -231,7 +234,9 @@ interface QuestionnaireWizardProps {
 export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
-  const { updateProfile, completeOnboarding } = useFounderStore();
+  const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   const currentQuestion = questionSteps[currentStep];
   const progress = ((currentStep + 1) / questionSteps.length) * 100;
@@ -243,13 +248,33 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
   
   const canProceed = answers[currentQuestion.id] !== undefined;
   
-  const handleNext = () => {
-    if (isLastStep) {
-      // Map answers to profile
-      const profile = mapAnswersToProfile(answers);
-      updateProfile(profile);
-      completeOnboarding();
-      onComplete();
+  const handleNext = async () => {
+    if (isLastStep && user) {
+      setSaving(true);
+      try {
+        // Map answers to profile
+        const profile = mapAnswersToProfile(answers);
+        const summary = generateProfileSummary(profile);
+        
+        // Save to database
+        await saveFounderProfile(user.id, profile, summary);
+        
+        toast({
+          title: "Profile created!",
+          description: "We've analyzed your profile and found your first idea.",
+        });
+        
+        onComplete();
+      } catch (error) {
+        console.error('Error saving profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your profile. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setSaving(false);
+      }
     } else {
       setCurrentStep(prev => prev + 1);
     }
@@ -307,7 +332,7 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
           <Button
             variant="ghost"
             onClick={handleBack}
-            disabled={currentStep === 0}
+            disabled={currentStep === 0 || saving}
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back
@@ -316,11 +341,17 @@ export function QuestionnaireWizard({ onComplete }: QuestionnaireWizardProps) {
           <Button
             variant="wizard"
             onClick={handleNext}
-            disabled={!canProceed}
+            disabled={!canProceed || saving}
             className="w-40"
           >
-            {isLastStep ? 'See My Results' : 'Continue'}
-            <ChevronRight className="w-4 h-4 ml-1" />
+            {saving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                {isLastStep ? 'See My Results' : 'Continue'}
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </>
+            )}
           </Button>
         </div>
       </footer>
@@ -566,7 +597,7 @@ function TradeOffOptions({
   );
 }
 
-function mapAnswersToProfile(answers: Record<string, any>): any {
+function mapAnswersToProfile(answers: Record<string, any>): FounderProfile {
   return {
     employmentStatus: answers['employment'],
     hoursPerWeek: answers['hours'] || 10,
