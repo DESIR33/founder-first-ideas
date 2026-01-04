@@ -245,6 +245,7 @@ export default function SavedIdeas() {
                     isExpanded={expandedId === idea.id}
                     onToggleExpand={() => setExpandedId(expandedId === idea.id ? null : idea.id)}
                     onRemove={() => handleRemoveIdea(idea.id)}
+                    onViewDetails={() => navigate(`/idea/${idea.id}`)}
                   />
                 </motion.div>
               ))}
@@ -261,9 +262,10 @@ interface SavedIdeaCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onRemove: () => void;
+  onViewDetails: () => void;
 }
 
-function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove }: SavedIdeaCardProps) {
+function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove, onViewDetails }: SavedIdeaCardProps) {
   return (
     <Card className="overflow-hidden transition-all">
       {/* Collapsed Header */}
@@ -373,7 +375,7 @@ function SavedIdeaCard({ idea, isExpanded, onToggleExpand, onRemove }: SavedIdea
                 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                  <Button variant="default" size="sm" onClick={() => window.open(`/idea/${idea.id}`, '_blank')}>
+                  <Button variant="default" size="sm" onClick={onViewDetails}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Full Details
                   </Button>
