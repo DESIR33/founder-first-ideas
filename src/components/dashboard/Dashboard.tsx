@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
   Bookmark, 
@@ -37,6 +37,15 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
 import { DecisionModeTooltip } from '@/components/decision-mode/DecisionModeTooltip';
+import { 
+  cardVariants, 
+  slideUpVariants, 
+  staggerContainerVariants, 
+  staggerItemVariants,
+  pulseVariants,
+  duration,
+  easing 
+} from '@/lib/motion';
 
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -134,7 +143,13 @@ export function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-foreground" />
+        <motion.div
+          variants={pulseVariants}
+          initial="idle"
+          animate="pulsing"
+        >
+          <Loader2 className="w-8 h-8 animate-spin text-foreground" />
+        </motion.div>
       </div>
     );
   }
@@ -242,25 +257,30 @@ export function Dashboard() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content - Idea */}
           <div className="lg:col-span-2 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <IdeaCard 
-                idea={currentIdea} 
-                onSave={handleSaveIdea}
-                onDismiss={handleDismissIdea}
-              />
-            </motion.div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIdea.id}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <IdeaCard 
+                  idea={currentIdea} 
+                  onSave={handleSaveIdea}
+                  onDismiss={handleDismissIdea}
+                />
+              </motion.div>
+            </AnimatePresence>
           </div>
           
           {/* Sidebar - Profile */}
           <div className="space-y-6">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.1 }}
             >
               <ProfileCard profile={profileSummary} />
             </motion.div>

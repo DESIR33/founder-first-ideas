@@ -9,6 +9,32 @@
 
 /* FounderFit Design System - Calm, AI-Native, Premium */
 
+/* =============================================================================
+   MOTION TOKENS (CSS Custom Properties)
+   ============================================================================= */
+:root {
+  /* Durations */
+  --ff-dur-xxs: 120ms;
+  --ff-dur-xs: 180ms;
+  --ff-dur-sm: 240ms;
+  --ff-dur-md: 360ms;
+  --ff-dur-lg: 520ms;
+  --ff-dur-xl: 700ms;
+  
+  /* Staggers */
+  --ff-stagger-xs: 40ms;
+  --ff-stagger-sm: 70ms;
+  --ff-stagger-md: 110ms;
+  
+  /* Easing - cubic beziers */
+  --ff-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ff-ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  
+  /* Spring approximation for CSS (using ease-out with slight overshoot feel) */
+  --ff-spring-calm: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ff-spring-snappy: cubic-bezier(0.22, 1.4, 0.36, 1);
+}
+
 @layer base {
   :root {
     /* FounderFit Core Tokens - Light Mode */
