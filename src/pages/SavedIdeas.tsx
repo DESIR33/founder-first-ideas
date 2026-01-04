@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -65,6 +65,8 @@ import { cn } from '@/lib/utils';
 import { CollectionManager, AddToCollectionDialog, getColorClass } from '@/components/ideas/CollectionManager';
 import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
 import { DecisionModeTooltip } from '@/components/decision-mode/DecisionModeTooltip';
+import { FitExplanation, EffortDescriptor } from '@/components/ideas';
+import { duration, easing, stagger } from '@/lib/motion';
 
 export default function SavedIdeas() {
   const [ideas, setIdeas] = useState<BusinessIdea[]>([]);
@@ -80,7 +82,7 @@ export default function SavedIdeas() {
   const [compareMode, setCompareMode] = useState(false);
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [validationProgress, setValidationProgress] = useState<Record<string, { completed: number; total: number }>>({});
-  
+  const [focusedIdeaId, setFocusedIdeaId] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const { isActive: isDecisionModeActive, activeIdeaId } = useDecisionMode();
   const { toast } = useToast();
@@ -380,36 +382,56 @@ export default function SavedIdeas() {
                 </p>
                 
                 <AnimatePresence>
-                  {filteredIdeas.map((idea, index) => (
-                    <motion.div
-                      key={idea.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <SavedIdeaCard
-                        idea={idea}
-                        isExpanded={expandedId === idea.id}
-                        compareMode={compareMode && !isDecisionModeActive}
-                        isSelectedForCompare={compareIds.includes(idea.id)}
-                        onToggleCompare={() => toggleCompareId(idea.id)}
-                        onToggleExpand={() => setExpandedId(expandedId === idea.id ? null : idea.id)}
-                        onRemove={() => handleRemoveIdea(idea.id)}
-                        onViewDetails={() => navigate(`/idea/${idea.id}`)}
-                        noteCount={noteCounts[idea.id] || 0}
-                        collections={collections}
-                        ideaCollectionIds={ideaCollections[idea.id] || []}
-                        userId={user?.id || ''}
-                        onCollectionsUpdate={(newIds) => {
-                          setIdeaCollections(prev => ({ ...prev, [idea.id]: newIds }));
+                  {filteredIdeas.map((idea, index) => {
+                    // Hierarchy level: first idea is primary if nothing focused, or focused one is primary
+                    const isPrimary = focusedIdeaId ? focusedIdeaId === idea.id : index === 0;
+                    const isBackground = focusedIdeaId && focusedIdeaId !== idea.id && index > 2;
+                    
+                    return (
+                      <motion.div
+                        key={idea.id}
+                        layout
+                        initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+                        animate={{ 
+                          opacity: isBackground ? 0.75 : 1, 
+                          y: 0, 
+                          filter: 'blur(0px)',
+                          scale: isPrimary ? 1.02 : isBackground ? 0.995 : 1.0,
                         }}
-                        validationProgress={validationProgress[idea.id]}
-                        isActiveIdea={isDecisionModeActive && activeIdeaId === idea.id}
-                        isDecisionModeActive={isDecisionModeActive}
-                      />
-                    </motion.div>
-                  ))}
+                        exit={{ opacity: 0, x: -100, filter: 'blur(4px)' }}
+                        transition={{ 
+                          delay: index * (stagger.sm / 1000),
+                          duration: duration.md / 1000,
+                          ease: easing.out,
+                        }}
+                      >
+                        <SavedIdeaCard
+                          idea={idea}
+                          isExpanded={expandedId === idea.id}
+                          compareMode={compareMode && !isDecisionModeActive}
+                          isSelectedForCompare={compareIds.includes(idea.id)}
+                          onToggleCompare={() => toggleCompareId(idea.id)}
+                          onToggleExpand={() => {
+                            setExpandedId(expandedId === idea.id ? null : idea.id);
+                            setFocusedIdeaId(idea.id);
+                          }}
+                          onRemove={() => handleRemoveIdea(idea.id)}
+                          onViewDetails={() => navigate(`/idea/${idea.id}`)}
+                          noteCount={noteCounts[idea.id] || 0}
+                          collections={collections}
+                          ideaCollectionIds={ideaCollections[idea.id] || []}
+                          userId={user?.id || ''}
+                          onCollectionsUpdate={(newIds) => {
+                            setIdeaCollections(prev => ({ ...prev, [idea.id]: newIds }));
+                          }}
+                          validationProgress={validationProgress[idea.id]}
+                          isActiveIdea={isDecisionModeActive && activeIdeaId === idea.id}
+                          isDecisionModeActive={isDecisionModeActive}
+                          isPrimary={isPrimary}
+                        />
+                      </motion.div>
+                    );
+                  })}
                 </AnimatePresence>
               </div>
             )}
@@ -437,6 +459,7 @@ interface SavedIdeaCardProps {
   validationProgress?: { completed: number; total: number };
   isActiveIdea?: boolean;
   isDecisionModeActive?: boolean;
+  isPrimary?: boolean;
 }
 
 function SavedIdeaCard({ 
@@ -455,16 +478,18 @@ function SavedIdeaCard({
   onCollectionsUpdate,
   validationProgress,
   isActiveIdea,
-  isDecisionModeActive
+  isDecisionModeActive,
+  isPrimary
 }: SavedIdeaCardProps) {
   const progressPercent = validationProgress && validationProgress.total > 0 
     ? Math.round((validationProgress.completed / validationProgress.total) * 100) 
     : null;
   return (
     <Card className={cn(
-      "overflow-hidden transition-all",
+      "overflow-hidden transition-all duration-[var(--ff-dur-md)] ease-[var(--ff-ease-out)]",
       isSelectedForCompare && "ring-2 ring-foreground",
-      isActiveIdea && "ring-2 ring-primary bg-primary/5"
+      isActiveIdea && "ring-2 ring-primary bg-primary/5",
+      isPrimary && "shadow-[var(--shadow-glow)]"
     )}>
       {/* Collapsed Header */}
       <div 

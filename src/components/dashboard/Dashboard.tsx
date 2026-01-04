@@ -4,18 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Bookmark, 
   X, 
-  DollarSign, 
-  Clock, 
-  Zap,
-  Target,
   TrendingUp,
-  AlertTriangle,
-  CheckCircle2,
-  ArrowRight,
-  Lightbulb,
   LogOut,
   Loader2,
-  Focus
+  Focus,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,11 +30,9 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { DecisionModeBanner } from '@/components/decision-mode/DecisionModeBanner';
 import { DecisionModeTooltip } from '@/components/decision-mode/DecisionModeTooltip';
+import { PrimaryIdeaCard } from '@/components/ideas';
 import { 
   cardVariants, 
-  slideUpVariants, 
-  staggerContainerVariants, 
-  staggerItemVariants,
   pulseVariants,
   duration,
   easing 
@@ -265,11 +256,22 @@ export function Dashboard() {
                 animate="visible"
                 exit="exit"
               >
-                <IdeaCard 
-                  idea={currentIdea} 
-                  onSave={handleSaveIdea}
-                  onDismiss={handleDismissIdea}
-                />
+                <PrimaryIdeaCard 
+                  idea={currentIdea}
+                  onClick={() => navigate(`/idea/${currentIdea.id}`)}
+                >
+                  {/* Actions inside the card */}
+                  <div className="flex items-center gap-3 pt-4 mt-2 border-t border-border/30">
+                    <Button variant="default" size="default" className="flex-1" onClick={(e) => { e.stopPropagation(); handleSaveIdea(); }}>
+                      <Bookmark className="w-4 h-4 mr-2" />
+                      Save this idea
+                    </Button>
+                    <Button variant="outline" size="default" onClick={(e) => { e.stopPropagation(); handleDismissIdea(); }}>
+                      <X className="w-4 h-4 mr-2" />
+                      Show me another
+                    </Button>
+                  </div>
+                </PrimaryIdeaCard>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -291,185 +293,7 @@ export function Dashboard() {
   );
 }
 
-interface IdeaCardProps {
-  idea: BusinessIdea;
-  onSave: () => void;
-  onDismiss: () => void;
-}
-
-function IdeaCard({ idea, onSave, onDismiss }: IdeaCardProps) {
-  return (
-    <Card className="overflow-hidden">
-      {/* Header */}
-      <CardHeader className="bg-secondary p-6 border-b border-border/50">
-        <div className="flex items-start justify-between">
-          <div>
-            <Badge variant="accent" className="mb-3">
-              This week's idea
-            </Badge>
-            <CardTitle className="text-2xl sm:text-3xl mb-2">
-              {idea.title}
-            </CardTitle>
-            <p className="text-muted-foreground">{idea.tagline}</p>
-          </div>
-          <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border/50">
-            <Zap className="w-4 h-4 text-foreground" />
-            <span className="font-semibold">{idea.matchScore}% match</span>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-6 space-y-8">
-        {/* Quick Stats */}
-        <div className="grid sm:grid-cols-4 gap-4">
-          <Stat 
-            icon={<DollarSign className="w-4 h-4" />}
-            label="Capital needed"
-            value={idea.capitalNeeded}
-          />
-          <Stat 
-            icon={<Clock className="w-4 h-4" />}
-            label="First revenue"
-            value={idea.timeToFirstRevenue}
-          />
-          <Stat 
-            icon={<TrendingUp className="w-4 h-4" />}
-            label="Potential"
-            value={idea.potentialMonthlyRevenue}
-          />
-          <Stat 
-            icon={<Target className="w-4 h-4" />}
-            label="Risk"
-            value={idea.riskLevel}
-            valueClass={
-              idea.riskLevel === 'low' 
-                ? 'text-success' 
-                : idea.riskLevel === 'high' 
-                  ? 'text-destructive' 
-                  : ''
-            }
-          />
-        </div>
-        
-        {/* Why You */}
-        <Section 
-          icon={<Lightbulb className="w-5 h-5 text-foreground" />}
-          title="Why this fits you"
-        >
-          <p className="text-muted-foreground">{idea.whyYou}</p>
-        </Section>
-        
-        {/* Problem & Solution */}
-        <Section title="The Problem">
-          <p className="text-muted-foreground">{idea.problemStatement}</p>
-        </Section>
-        
-        <Section title="Your Solution">
-          <p className="text-muted-foreground">{idea.solution}</p>
-        </Section>
-        
-        <Section title="Target Customer">
-          <p className="text-muted-foreground">{idea.targetCustomer}</p>
-        </Section>
-        
-        {/* MVP Scope */}
-        <Section title="MVP Scope">
-          <ul className="space-y-2">
-            {idea.mvpScope.map((item, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
-                <span className="text-muted-foreground">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-        
-        {/* 7-Day Plan */}
-        <Section title="If I had 7 days, I'd do this">
-          <div className="bg-secondary/50 rounded-xl p-4 space-y-3">
-            {idea.sevenDayPlan.map((item, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-muted text-foreground text-xs font-semibold flex items-center justify-center flex-shrink-0">
-                  {i + 1}
-                </div>
-                <span className="text-sm">{item}</span>
-              </div>
-            ))}
-          </div>
-        </Section>
-        
-        {/* Kill Criteria */}
-        <Section 
-          icon={<AlertTriangle className="w-5 h-5 text-destructive" />}
-          title="When to stop"
-        >
-          <ul className="space-y-2">
-            {idea.killCriteria.map((item, i) => (
-              <li key={i} className="flex items-start gap-2">
-                <X className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
-                <span className="text-muted-foreground text-sm">{item}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-        
-        {/* Actions */}
-        <div className="flex items-center gap-4 pt-4 border-t border-border/50">
-          <Button variant="default" size="lg" className="flex-1" onClick={onSave}>
-            <Bookmark className="w-4 h-4 mr-2" />
-            Save this idea
-          </Button>
-          <Button variant="outline" size="lg" onClick={onDismiss}>
-            <X className="w-4 h-4 mr-2" />
-            Show me another
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function Stat({ 
-  icon, 
-  label, 
-  value, 
-  valueClass 
-}: { 
-  icon: React.ReactNode; 
-  label: string; 
-  value: string;
-  valueClass?: string;
-}) {
-  return (
-    <div className="bg-secondary/50 rounded-xl p-3 border border-border/30">
-      <div className="flex items-center gap-2 text-muted-foreground mb-1">
-        {icon}
-        <span className="text-xs">{label}</span>
-      </div>
-      <p className={cn("font-semibold capitalize", valueClass)}>{value}</p>
-    </div>
-  );
-}
-
-function Section({ 
-  icon, 
-  title, 
-  children 
-}: { 
-  icon?: React.ReactNode; 
-  title: string; 
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <h3 className="font-semibold text-lg">{title}</h3>
-      </div>
-      {children}
-    </div>
-  );
-}
+// Removed old IdeaCard, Stat, and Section components - now using hierarchy system from @/components/ideas
 
 function ProfileCard({ profile }: { profile: FounderProfileSummary }) {
   return (
