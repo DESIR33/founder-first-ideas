@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { HeroSection, HowItWorksSection, DifferentiatorSection, TargetAudienceSection, CTASection } from '@/components/landing/LandingSections';
+import { HeroSection, ToolSuiteSection, ManifestoSection, CTASection, Footer } from '@/components/landing/LandingSections';
 import { QuestionnaireWizard } from '@/components/questionnaire/QuestionnaireWizard';
 import { IdeaSynthesisFlow } from '@/components/synthesis';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -18,6 +18,11 @@ const Index = () => {
   const [founderProfile, setFounderProfile] = useState<FounderProfile | null>(null);
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Set dark mode by default
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     async function checkOnboarding() {
@@ -73,8 +78,8 @@ const Index = () => {
   // Show loading while checking auth
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen gradient-hero flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -102,22 +107,12 @@ const Index = () => {
 
   // Show landing page
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <HeroSection onGetStarted={handleGetStarted} />
-      <HowItWorksSection />
-      <DifferentiatorSection />
-      <TargetAudienceSection />
+      <ToolSuiteSection />
+      <ManifestoSection />
       <CTASection onGetStarted={handleGetStarted} />
-      
-      {/* Footer */}
-      <footer className="py-12 border-t">
-        <div className="container mx-auto px-6 text-center">
-          <p className="font-serif text-xl font-semibold mb-2">FounderFit</p>
-          <p className="text-sm text-muted-foreground">
-            Ideas that actually fit you.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

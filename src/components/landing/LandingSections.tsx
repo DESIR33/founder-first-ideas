@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Target, Clock, Sparkles, Shield, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Brain, Package, Wrench, FlaskConical, Twitter, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -9,86 +8,56 @@ interface HeroSectionProps {
 
 export function HeroSection({ onGetStarted }: HeroSectionProps) {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Subtle gradient glow */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-muted/30 to-transparent rounded-full blur-3xl" />
-      </div>
-      
-      <div className="container mx-auto px-6 py-20 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+    <section className="relative min-h-screen flex items-center">
+      <div className="container mx-auto px-6 py-32">
+        <div className="max-w-4xl">
+          {/* Brand */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="text-sm font-medium tracking-[0.2em] uppercase text-muted-foreground mb-8"
           >
-            <Badge variant="accent" className="mb-8">
-              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Founder-first idea matching
-            </Badge>
-          </motion.div>
+            Hustling Labs
+          </motion.p>
           
           {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-semibold leading-[1.1] mb-6 tracking-tight"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl sm:text-6xl md:text-7xl font-semibold leading-[1.05] mb-6"
           >
-            Stop browsing ideas.
+            Designing the Edge
             <br />
-            <span className="text-muted-foreground">Get ideas that fit you.</span>
+            <span className="text-muted-foreground">for Modern Founders</span>
           </motion.h1>
           
           {/* Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-muted-foreground max-w-xl mx-auto mb-10"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg text-muted-foreground max-w-xl mb-12"
           >
-            We learn who you are, what you can execute, and what you actually want—then deliver one high-quality business idea per week.
+            Tools, insights, and frameworks built for founders who move with clarity — not chaos.
           </motion.p>
           
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            transition={{ duration: 0.6, delay: 0.3 }}
           >
-            <Button variant="hero" size="xl" onClick={onGetStarted}>
-              Find My Business Idea
-              <ArrowRight className="w-5 h-5 ml-1" />
+            <Button 
+              variant="default" 
+              size="lg" 
+              onClick={onGetStarted}
+              className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-base font-medium"
+            >
+              Explore the Tools
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
-            <p className="text-sm text-muted-foreground">
-              5 minutes • Free forever
-            </p>
-          </motion.div>
-          
-          {/* Value props */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="grid sm:grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 border-t border-border/50"
-          >
-            <ValueProp
-              icon={<Target className="w-5 h-5" />}
-              title="Personalized"
-              description="Filtered by your skills and goals"
-            />
-            <ValueProp
-              icon={<Clock className="w-5 h-5" />}
-              title="Weekly delivery"
-              description="One curated idea, no scrolling"
-            />
-            <ValueProp
-              icon={<Shield className="w-5 h-5" />}
-              title="Actionable"
-              description="7-day plan with every idea"
-            />
           </motion.div>
         </div>
       </div>
@@ -96,83 +65,71 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
   );
 }
 
-function ValueProp({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
-}) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground mb-3">
-        {icon}
-      </div>
-      <h3 className="font-medium mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </div>
-  );
-}
+const tools = [
+  {
+    icon: Brain,
+    title: 'The Idea Engine',
+    description: 'Get startup ideas personalized to your skills, experience, and assets.',
+    href: '#idea-engine',
+  },
+  {
+    icon: Package,
+    title: 'Startup Blueprints',
+    description: 'Execution-ready playbooks: MVP features, tech stack, pricing, positioning.',
+    href: '#blueprints',
+  },
+  {
+    icon: Wrench,
+    title: 'Founder Tools',
+    description: 'Exclusive templates, funding decks, outreach frameworks, and more.',
+    href: '#tools',
+  },
+  {
+    icon: FlaskConical,
+    title: 'Lab Experiments',
+    description: "Try early prototypes, microtools, and Hustling Labs' internal projects.",
+    href: '#experiments',
+  },
+];
 
-export function HowItWorksSection() {
-  const steps = [
-    {
-      number: '01',
-      title: 'Tell us about you',
-      description: 'A friendly 5-minute questionnaire about your background and goals.',
-    },
-    {
-      number: '02',
-      title: 'Get your profile',
-      description: 'We generate a profile that captures your unique strengths.',
-    },
-    {
-      number: '03',
-      title: 'Receive ideas',
-      description: 'One high-quality idea per week, tailored to you.',
-    },
-    {
-      number: '04',
-      title: 'Start building',
-      description: 'Each idea comes with a 7-day action plan.',
-    },
-  ];
-  
+export function ToolSuiteSection() {
   return (
-    <section className="py-24 border-t border-border/50">
+    <section className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <Badge variant="muted" className="mb-4">How it works</Badge>
-          <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-            From overwhelmed to focused
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            No more browsing endless idea lists. We do the matching.
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="mb-16"
+        >
+          <p className="text-sm font-medium tracking-[0.15em] uppercase text-muted-foreground mb-4">
+            Tool Suite
           </p>
-        </div>
+          <h2 className="text-3xl sm:text-4xl font-semibold">
+            Everything you need to build smarter
+          </h2>
+        </motion.div>
         
-        <div className="grid md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.number}
+        <div className="grid md:grid-cols-2 gap-px bg-border">
+          {tools.map((tool, index) => (
+            <motion.a
+              key={tool.title}
+              href={tool.href}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="relative"
+              className="group bg-background p-10 hover:bg-secondary transition-colors duration-300"
             >
-              <div className="text-4xl font-semibold text-muted/50 mb-4">
-                {step.number}
+              <tool.icon className="w-6 h-6 mb-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <h3 className="text-xl font-medium mb-3">{tool.title}</h3>
+              <p className="text-muted-foreground leading-relaxed">{tool.description}</p>
+              <div className="mt-6 flex items-center text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                Learn more
+                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
               </div>
-              <h3 className="font-medium mb-2">{step.title}</h3>
-              <p className="text-sm text-muted-foreground">{step.description}</p>
-              
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-5 left-full w-full h-px bg-border -translate-x-4" />
-              )}
-            </motion.div>
+            </motion.a>
           ))}
         </div>
       </div>
@@ -180,87 +137,32 @@ export function HowItWorksSection() {
   );
 }
 
-export function DifferentiatorSection() {
-  const comparisons = [
-    { them: 'Trend-first recommendations', us: 'Founder-first matching' },
-    { them: 'Endless idea lists to browse', us: 'One curated idea per week' },
-    { them: 'Generic "hot" opportunities', us: 'Filtered by your capabilities' },
-    { them: 'Hype-driven suggestions', us: 'Realistic execution plans' },
-  ];
-  
+export function ManifestoSection() {
   return (
-    <section className="py-24 border-t border-border/50">
+    <section className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-16">
-            <Badge variant="outline" className="mb-4">Why different</Badge>
-            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-              Others tell you what's trending.
-              <br />
-              <span className="text-muted-foreground">We tell you what to build.</span>
-            </h2>
-          </div>
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-8 leading-tight"
+          >
+            We Don't Build Noise.
+            <br />
+            <span className="text-muted-foreground">We Build Leverage.</span>
+          </motion.h2>
           
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="bg-secondary/50 rounded-2xl p-6 border border-border/30">
-              <p className="text-sm font-medium text-muted-foreground mb-4">Others</p>
-              {comparisons.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 py-2">
-                  <div className="w-4 h-4 rounded-full border border-muted-foreground/30 mt-0.5" />
-                  <span className="text-muted-foreground">{item.them}</span>
-                </div>
-              ))}
-            </div>
-            
-            <div className="bg-card rounded-2xl p-6 border border-border">
-              <p className="text-sm font-medium text-foreground mb-4">FounderFit</p>
-              {comparisons.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 py-2">
-                  <CheckCircle2 className="w-4 h-4 text-foreground mt-0.5" />
-                  <span className="font-medium">{item.us}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-export function TargetAudienceSection() {
-  const audiences = [
-    { emoji: '🛠️', label: 'Builders & indie hackers' },
-    { emoji: '👔', label: 'Busy professionals' },
-    { emoji: '🎖️', label: 'Military & parents' },
-    { emoji: '🎨', label: 'Content creators' },
-    { emoji: '⚡', label: 'No-code founders' },
-    { emoji: '🚀', label: 'First-time entrepreneurs' },
-  ];
-  
-  return (
-    <section className="py-24 border-t border-border/50">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <Badge variant="muted" className="mb-4">Who it's for</Badge>
-          <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-            Built for people with real constraints
-          </h2>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Not everyone has 80 hours a week and $100K to burn.
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
-          {audiences.map((audience) => (
-            <div
-              key={audience.label}
-              className="flex items-center gap-2 bg-secondary px-4 py-2.5 rounded-full border border-border/50"
-            >
-              <span className="text-lg">{audience.emoji}</span>
-              <span className="text-sm font-medium">{audience.label}</span>
-            </div>
-          ))}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            viewport={{ once: true }}
+            className="text-lg text-muted-foreground leading-relaxed"
+          >
+            Most founders waste time building the wrong thing. Hustling Labs exists to eliminate that guesswork. We give you the clarity to build what works — and the tools to move fast.
+          </motion.p>
         </div>
       </div>
     </section>
@@ -273,33 +175,99 @@ interface CTASectionProps {
 
 export function CTASection({ onGetStarted }: CTASectionProps) {
   return (
-    <section className="py-24 border-t border-border/50">
+    <section className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="bg-card rounded-3xl p-12 border border-border"
           >
             <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-              Ready to find your idea?
+              Ready to Build Smarter?
             </h2>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              Take our 5-minute questionnaire and get your first personalized idea today.
+            <p className="text-muted-foreground mb-10">
+              We're quietly opening the doors. Get early access.
             </p>
             <Button 
-              variant="hero" 
-              size="xl" 
+              variant="default"
+              size="lg"
               onClick={onGetStarted}
+              className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-base font-medium"
             >
-              Start the Questionnaire
-              <ArrowRight className="w-5 h-5 ml-1" />
+              Join the Waitlist
+              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
           </motion.div>
         </div>
       </div>
     </section>
   );
+}
+
+export function Footer() {
+  return (
+    <footer className="py-16 border-t border-border">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          {/* Navigation */}
+          <nav className="flex flex-wrap gap-8 text-sm">
+            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </a>
+            <a href="#tools" className="text-muted-foreground hover:text-foreground transition-colors">
+              Tools
+            </a>
+            <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+              Contact
+            </a>
+            <a href="#terms" className="text-muted-foreground hover:text-foreground transition-colors">
+              Terms
+            </a>
+          </nav>
+          
+          {/* Social */}
+          <div className="flex items-center gap-6">
+            <a 
+              href="https://twitter.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Twitter className="w-5 h-5" />
+            </a>
+            <a 
+              href="https://linkedin.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+        
+        {/* Bottom line */}
+        <div className="mt-12 pt-8 border-t border-border">
+          <p className="text-sm text-muted-foreground">
+            Quietly building the future.
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+// Legacy exports for compatibility
+export function HowItWorksSection() {
+  return null;
+}
+
+export function DifferentiatorSection() {
+  return null;
+}
+
+export function TargetAudienceSection() {
+  return null;
 }

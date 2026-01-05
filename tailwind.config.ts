@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -64,23 +64,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // FounderFit specific tokens
-        ff: {
-          bg: "hsl(var(--ff-bg))",
-          "text-primary": "hsl(var(--ff-text-primary))",
-          "text-secondary": "hsl(var(--ff-text-secondary))",
-          accent: "hsl(var(--ff-accent))",
-          "accent-soft": "hsl(var(--ff-accent-soft))",
+        // Hustling Labs tokens
+        hl: {
+          bg: "hsl(var(--hl-bg))",
+          "text-primary": "hsl(var(--hl-text-primary))",
+          "text-secondary": "hsl(var(--hl-text-secondary))",
+          "accent-teal": "hsl(var(--hl-accent-teal))",
+          "accent-gold": "hsl(var(--hl-accent-gold))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        glass: "var(--ff-glass-radius)",
-      },
-      backdropBlur: {
-        glass: "var(--ff-glass-blur)",
       },
       keyframes: {
         "accordion-down": {
@@ -109,10 +105,10 @@ export default {
         },
         "pulse-glow": {
           "0%, 100%": { 
-            boxShadow: "0 0 40px hsl(var(--ff-glow-color) / 0.08)" 
+            boxShadow: "0 0 30px hsl(var(--hl-accent-teal) / 0.1)" 
           },
           "50%": { 
-            boxShadow: "0 0 60px hsl(var(--ff-glow-color) / 0.15)" 
+            boxShadow: "0 0 50px hsl(var(--hl-accent-teal) / 0.2)" 
           },
         },
       },
@@ -128,7 +124,6 @@ export default {
       boxShadow: {
         soft: "var(--shadow-soft)",
         card: "var(--shadow-card)",
-        glow: "var(--shadow-glow)",
         elevated: "var(--shadow-elevated)",
       },
     },
