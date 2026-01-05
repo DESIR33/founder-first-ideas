@@ -12,6 +12,10 @@ import SavedIdeas from "./pages/SavedIdeas";
 import IdeaDetail from "./pages/IdeaDetail";
 import Analytics from "./pages/Analytics";
 import CompareIdeas from "./pages/CompareIdeas";
+import IdeaEngine from "./pages/IdeaEngine";
+import Blueprints from "./pages/Blueprints";
+import FounderTools from "./pages/FounderTools";
+import LabExperiments from "./pages/LabExperiments";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +36,10 @@ const App = () => (
                 <Route path="/idea/:id" element={<IdeaDetail />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/compare" element={<CompareIdeas />} />
+                <Route path="/idea-engine" element={<IdeaEngine />} />
+                <Route path="/blueprints" element={<Blueprints />} />
+                <Route path="/tools" element={<FounderTools />} />
+                <Route path="/lab" element={<LabExperiments />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
