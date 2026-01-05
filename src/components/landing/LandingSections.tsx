@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Brain, Package, Wrench, FlaskConical, Twitter, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { WaitlistForm } from './WaitlistForm';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -173,11 +174,7 @@ export function ManifestoSection() {
   );
 }
 
-interface CTASectionProps {
-  onGetStarted: () => void;
-}
-
-export function CTASection({ onGetStarted }: CTASectionProps) {
+export function CTASection() {
   return (
     <section className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
@@ -194,15 +191,7 @@ export function CTASection({ onGetStarted }: CTASectionProps) {
             <p className="text-muted-foreground mb-10">
               We're quietly opening the doors. Get early access.
             </p>
-            <Button 
-              variant="default"
-              size="lg"
-              onClick={onGetStarted}
-              className="group bg-foreground text-background hover:bg-foreground/90 px-8 py-6 text-base font-medium"
-            >
-              Join the Waitlist
-              <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-            </Button>
+            <WaitlistForm source="homepage-cta" />
           </motion.div>
         </div>
       </div>
