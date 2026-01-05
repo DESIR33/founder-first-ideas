@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Brain, Package, Wrench, FlaskConical, Twitter, Linkedin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 interface HeroSectionProps {
@@ -70,25 +71,25 @@ const tools = [
     icon: Brain,
     title: 'The Idea Engine',
     description: 'Get startup ideas personalized to your skills, experience, and assets.',
-    href: '#idea-engine',
+    href: '/idea-engine',
   },
   {
     icon: Package,
     title: 'Startup Blueprints',
     description: 'Execution-ready playbooks: MVP features, tech stack, pricing, positioning.',
-    href: '#blueprints',
+    href: '/blueprints',
   },
   {
     icon: Wrench,
     title: 'Founder Tools',
     description: 'Exclusive templates, funding decks, outreach frameworks, and more.',
-    href: '#tools',
+    href: '/tools',
   },
   {
     icon: FlaskConical,
     title: 'Lab Experiments',
     description: "Try early prototypes, microtools, and Hustling Labs' internal projects.",
-    href: '#experiments',
+    href: '/lab',
   },
 ];
 
@@ -113,23 +114,26 @@ export function ToolSuiteSection() {
         
         <div className="grid md:grid-cols-2 gap-px bg-border">
           {tools.map((tool, index) => (
-            <motion.a
+            <motion.div
               key={tool.title}
-              href={tool.href}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="group bg-background p-10 hover:bg-secondary transition-colors duration-300"
             >
-              <tool.icon className="w-6 h-6 mb-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-              <h3 className="text-xl font-medium mb-3">{tool.title}</h3>
-              <p className="text-muted-foreground leading-relaxed">{tool.description}</p>
-              <div className="mt-6 flex items-center text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                Learn more
-                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-              </div>
-            </motion.a>
+              <Link
+                to={tool.href}
+                className="group block bg-background p-10 hover:bg-secondary transition-colors duration-300"
+              >
+                <tool.icon className="w-6 h-6 mb-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <h3 className="text-xl font-medium mb-3">{tool.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{tool.description}</p>
+                <div className="mt-6 flex items-center text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  Learn more
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>

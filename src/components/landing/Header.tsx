@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import hustlingLabsLogo from '@/assets/hustling-labs-logo.png';
 
@@ -34,40 +35,40 @@ export function Header({ onGetStarted }: HeaderProps) {
           <div className="container mx-auto px-6">
             <div className="flex items-center justify-between h-16">
               {/* Logo */}
-              <a href="/" className="flex items-center gap-3">
+              <Link to="/" className="flex items-center gap-3">
                 <img 
                   src={hustlingLabsLogo} 
                   alt="Hustling Labs" 
                   className="h-8 w-auto"
                 />
-              </a>
+              </Link>
 
               {/* Navigation */}
               <nav className="hidden md:flex items-center gap-8">
-                <a 
-                  href="#tools" 
+                <Link 
+                  to="/idea-engine" 
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Tools
-                </a>
-                <a 
-                  href="#blueprints" 
+                  Idea Engine
+                </Link>
+                <Link 
+                  to="/blueprints" 
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Blueprints
-                </a>
-                <a 
-                  href="#experiments" 
+                </Link>
+                <Link 
+                  to="/tools" 
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Tools
+                </Link>
+                <Link 
+                  to="/lab" 
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Lab
-                </a>
-                <a 
-                  href="#about" 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  About
-                </a>
+                </Link>
               </nav>
 
               {/* CTA */}
