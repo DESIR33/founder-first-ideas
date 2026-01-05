@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroSection, ToolSuiteSection, ManifestoSection, CTASection, Footer } from '@/components/landing/LandingSections';
+import { Header } from '@/components/landing/Header';
 import { QuestionnaireWizard } from '@/components/questionnaire/QuestionnaireWizard';
 import { IdeaSynthesisFlow } from '@/components/synthesis';
 import { Dashboard } from '@/components/dashboard/Dashboard';
@@ -108,6 +109,7 @@ const Index = () => {
   // Show landing page
   return (
     <div className="min-h-screen bg-background">
+      <Header onGetStarted={handleGetStarted} />
       <HeroSection onGetStarted={handleGetStarted} />
       <ToolSuiteSection />
       <ManifestoSection />
