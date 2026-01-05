@@ -113,7 +113,7 @@ const Index = () => {
       <HeroSection onGetStarted={handleGetStarted} />
       <ToolSuiteSection />
       <ManifestoSection />
-      <CTASection onGetStarted={handleGetStarted} />
+      <CTASection />
       <Footer />
     </div>
   );
