@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ onGetStarted }: HeroSectionProps) {
   return (
-    <section className="relative min-h-screen flex items-center">
+    <section id="hero" className="relative min-h-screen flex items-center">
       <div className="container mx-auto px-6 py-32">
         <div className="max-w-4xl">
           {/* Brand */}
@@ -96,7 +96,7 @@ const tools = [
 
 export function ToolSuiteSection() {
   return (
-    <section className="py-32 border-t border-border">
+    <section id="tools" className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -144,7 +144,7 @@ export function ToolSuiteSection() {
 
 export function ManifestoSection() {
   return (
-    <section className="py-32 border-t border-border">
+    <section id="about" className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
@@ -176,7 +176,7 @@ export function ManifestoSection() {
 
 export function CTASection() {
   return (
-    <section className="py-32 border-t border-border">
+    <section id="contact" className="py-32 border-t border-border">
       <div className="container mx-auto px-6">
         <div className="max-w-2xl mx-auto text-center">
           <motion.div
